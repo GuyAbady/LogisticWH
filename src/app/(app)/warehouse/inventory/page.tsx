@@ -23,7 +23,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
       },
       orderBy: [{ category: "asc" }, { name: "asc" }],
     }),
-    db.catalogItem.findMany({ distinct: ["category"], select: { category: true }, orderBy: { category: "asc" } }),
+    db.category.findMany({ orderBy: { name: "asc" }, select: { name: true } }),
     db.inventorySerial.groupBy({ by: ["catalogItemId"], where: { status: "IN_REPAIR" }, _count: true }),
   ]);
   const repairMap = new Map(repair.map((r) => [r.catalogItemId, r._count]));
@@ -45,7 +45,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
         <input name="q" defaultValue={q} placeholder='חיפוש לפי מק"ט או שם' className="input max-w-xs" />
         <select name="category" defaultValue={category} className="input max-w-[12rem]">
           <option value="">כל הקטגוריות</option>
-          {categories.map((c) => <option key={c.category} value={c.category}>{c.category}</option>)}
+          {categories.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
         </select>
         <button className="btn-secondary">סינון</button>
       </form>

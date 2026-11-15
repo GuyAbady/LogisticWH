@@ -27,6 +27,7 @@ export async function createCatalogItem(_prev: ActionResult, fd: FormData): Prom
     requiresSerial: fd.get("requiresSerial") === "on",
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (!(await db.category.findUnique({ where: { name: parsed.data.category } }))) return { error: "יש לבחור קטגוריה קיימת" };
   let id: string;
   try {
     const item = await db.catalogItem.create({ data: { ...parsed.data, sku: parsed.data.sku.toUpperCase() } });
@@ -97,4 +98,35 @@ export async function adjustStock(_prev: ActionResult, fd: FormData): Promise<Ac
   } catch (e) {
     return { error: errorMessage(e) };
   }
+}
+
+const UpdateItemSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().trim().min(2, "שם פריט קצר מדי").max(120),
+  category: z.string().trim().min(1, "יש לבחור קטגוריה"),
+  description: z.string().trim().max(500).optional(),
+  isActive: z.boolean(),
+});
+
+/** עריכת פרטי פריט קטלוג (לא מק"ט ולא סוג סידורי/כמותי – משפיעים על נתונים קיימים) */
+export async function updateCatalogItem(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
+  const user = await requireRole("WAREHOUSE_MANAGER");
+  const parsed = UpdateItemSchema.safeParse({
+    id: fd.get("id"),
+    name: fd.get("name"),
+    category: fd.get("category"),
+    description: (fd.get("description") as string) || undefined,
+    isActive: fd.get("isActive") === "on",
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { id, ...data } = parsed.data;
+  if (!(await db.category.findUnique({ where: { name: data.category } }))) return { error: "יש לבחור קטגוריה קיימת" };
+  try {
+    await db.catalogItem.update({ where: { id }, data: { ...data, description: data.description ?? null } });
+    await audit({ userId: user.id, action: "CATALOG_UPDATE", entity: "CatalogItem", entityId: id });
+  } catch (e) {
+    return { error: errorMessage(e) };
+  }
+  revalidatePath("/warehouse", "layout");
+  return { ok: "הפריט עודכן" };
 }
