@@ -36,6 +36,13 @@ npm run dev                 # http://localhost:3000
    - **אחרי ההקמה: למחוק את `SETUP_TOKEN` מ-Vercel** (ואז ה-Deploy הבא מכבה את הדף לחלוטין).
 6. **לא** להריץ `db:seed` בייצור (הסקריפט חוסם זאת).
 
+### כתובת ייצור והגנת גישה
+- הכתובת `logisticwh.vercel.app` **אינה** שייכת לפרויקט (תפוסה). יש להגדיר כתובת ייצור ב-Settings → Domains
+  (למשל `<שם-פנוי>.vercel.app`) ולשייך אותה ל-Production.
+- Settings → Deployment Protection: **Standard Protection** – כתובת הייצור ציבורית (העובדים נכנסים דרך מסך הכניסה של המערכת),
+  כתובות Preview נעולות בהתחברות Vercel.
+- Production Branch: `main`. פיתוח נעשה ב-branch נפרד ומוזג ל-`main` רק לאחר בדיקה ב-Preview.
+
 > הערה: "Vercel Postgres" הופסק והועבר ל-Neon בדצמבר 2024; כיום מסד הנתונים מוקם דרך Vercel Marketplace.
 > מקורות: [Vercel Docs – Postgres](https://vercel.com/docs/postgres), [Prisma – Deploy to Vercel](https://www.prisma.io/docs/orm/prisma-client/deployment/edge/deploy-to-vercel).
 
