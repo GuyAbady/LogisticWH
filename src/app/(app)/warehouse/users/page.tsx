@@ -4,7 +4,7 @@ import Link from "next/link";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { ROLE_LABELS } from "@/lib/roles";
-import { createUnit, createUser, resetUserPassword, setUserActive } from "@/app/actions/admin";
+import { createUnit, createUser, resetUserPassword, setUserActive, updateUser } from "@/app/actions/admin";
 import { PageHeader } from "@/components/ui";
 import ActionForm from "@/components/ActionForm";
 
@@ -96,6 +96,24 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                 <td className="py-2">{u.unit.name}</td>
                 <td className="py-2 text-xs"><span className="ltr block">{u.email}</span><span className="ltr block">{u.phone}</span></td>
                 <td className="py-2">
+                  {(u.role !== "ADMIN" || me.role === "ADMIN") && (
+                    <details className="mb-2">
+                      <summary className="btn-secondary min-h-9 px-2.5 text-xs list-none">עריכה{u.id === me.id && " (אני)"}</summary>
+                      <ActionForm action={updateUser} submitLabel="שמירה" className="mt-2 grid min-w-72 gap-2" buttonClassName="btn-primary min-h-9 text-xs">
+                        <input type="hidden" name="userId" value={u.id} />
+                        <input name="fullName" defaultValue={u.fullName} required aria-label="שם מלא" className="input min-h-9 py-1 text-sm" />
+                        <input name="employeeNumber" defaultValue={u.employeeNumber} required aria-label="מספר עובד" className="input ltr min-h-9 py-1 text-sm" />
+                        <input name="email" type="email" defaultValue={u.email} required aria-label='דוא"ל' className="input min-h-9 py-1 text-sm" />
+                        <input name="phone" type="tel" defaultValue={u.phone} required aria-label="טלפון" className="input min-h-9 py-1 text-sm" />
+                        <select name="role" defaultValue={u.role} aria-label="תפקיד" className="input min-h-9 py-1 text-sm">
+                          {Object.entries(ROLE_LABELS).filter(([k]) => k !== "ADMIN" || canGrantAdmin || u.role === "ADMIN").map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                        </select>
+                        <select name="unitId" defaultValue={u.unitId} aria-label="יחידה" className="input min-h-9 py-1 text-sm">
+                          {units.map((un) => <option key={un.id} value={un.id}>{un.name}</option>)}
+                        </select>
+                      </ActionForm>
+                    </details>
+                  )}
                   {u.id !== me.id && (
                     <div className="flex flex-wrap gap-2">
                       <ActionForm action={setUserActive} submitLabel={u.isActive ? "השבת" : "הפעל"} className="contents" buttonClassName="btn-secondary min-h-9 px-2.5 text-xs"

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireRole } from "@/lib/dal";
 import { audit } from "@/lib/audit";
+import { createSession } from "@/lib/session";
 import { PasswordSchema } from "@/lib/password";
 import { errorMessage, type ActionResult } from "@/lib/action-result";
 
@@ -99,4 +100,55 @@ export async function resetUserPassword(_prev: ActionResult, fd: FormData): Prom
   await db.user.update({ where: { id: userId }, data: { passwordHash: await bcrypt.hash(parsed.data, 12) } });
   await audit({ userId: admin.id, action: "USER_PASSWORD_RESET", entity: "User", entityId: userId });
   return { ok: "הסיסמה אופסה. מסור אותה לעובד בערוץ מאובטח." };
+}
+
+const EditUserSchema = z.object({
+  userId: z.string().uuid(),
+  fullName: z.string().trim().min(2, "שם מלא קצר מדי").max(80),
+  employeeNumber: z.string().trim().min(1, "יש להזין מספר עובד").max(20),
+  email: z.string().trim().toLowerCase().email('כתובת דוא"ל לא תקינה'),
+  phone: z.string().trim().regex(/^[0-9+\-\s]{9,15}$/, "מספר טלפון לא תקין"),
+  role: z.enum(["EMPLOYEE", "UNIT_MANAGER", "WAREHOUSE_MANAGER", "ADMIN"]),
+  unitId: z.string().uuid("יש לבחור יחידה"),
+});
+
+/**
+ * עריכת משתמש קיים (כולל שינוי תפקיד). כללי הרשאה:
+ * - הענקת ADMIN: רק ADMIN, או כשאין עדיין אף ADMIN (אתחול – כולל קידום עצמי של מנהל מרלו"ג).
+ * - מנהל מרלו"ג אינו עורך משתמש ADMIN.
+ * - אסור להוריד את מנהל המערכת האחרון מתפקידו (מניעת נעילה מחוץ למערכת).
+ */
+export async function updateUser(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
+  const actor = await requireRole("WAREHOUSE_MANAGER");
+  const parsed = EditUserSchema.safeParse(Object.fromEntries(
+    ["userId", "fullName", "employeeNumber", "email", "phone", "role", "unitId"].map((k) => [k, fd.get(k)]),
+  ));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { userId, ...data } = parsed.data;
+
+  const target = await db.user.findUnique({ where: { id: userId }, select: { role: true } });
+  if (!target) return { error: "משתמש לא נמצא" };
+  if (await isAdminTargetForbidden(actor.role, userId)) return { error: "רק מנהל מערכת יכול לערוך מנהל מערכת" };
+
+  const admins = await db.user.count({ where: { role: "ADMIN", isActive: true } });
+  if (data.role === "ADMIN" && target.role !== "ADMIN" && actor.role !== "ADMIN" && admins > 0) {
+    return { error: "רק מנהל מערכת יכול להעניק תפקיד מנהל מערכת" };
+  }
+  if (target.role === "ADMIN" && data.role !== "ADMIN" && admins <= 1) {
+    return { error: "זהו מנהל המערכת היחיד – לא ניתן להסיר את תפקידו" };
+  }
+
+  try {
+    await db.user.update({ where: { id: userId }, data });
+    await audit({
+      userId: actor.id, action: "USER_UPDATE", entity: "User", entityId: userId,
+      details: target.role !== data.role ? `תפקיד: ${target.role} → ${data.role}` : undefined,
+    });
+  } catch (e) {
+    return { error: errorMessage(e) };
+  }
+  // עריכה עצמית: רענון עוגיית ה-Session, כדי שהניתוב (proxy) יכיר מיד בתפקיד/יחידה החדשים
+  if (userId === actor.id) await createSession({ userId, role: data.role, unitId: data.unitId });
+  revalidatePath("/", "layout");
+  return { ok: userId === actor.id && target.role !== data.role ? "התפקיד שלך עודכן. רעננו את הדף כדי לראות את התפריט החדש." : "המשתמש עודכן" };
 }
