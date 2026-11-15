@@ -17,6 +17,7 @@ const SUCCESS: Record<string, string> = {
   BULK_TRANSFER: "החלוקה נרשמה. כל עובד יקבל בקשה לאשר את הציוד; עד האישור הוא באחריותך.",
   BULK_COLLECT: "הציוד נאסף ונרשם עליך. העובדים זוכו וקיבלו טופס זיכוי.",
   ACK: "אישרת את קבלת הציוד. מעתה הוא רשום עליך.",
+  ISSUE: "הניפוק נרשם. הציוד רשום על המקבל, והקבלה נשלחה אליו (אם הוגדר מייל/SMS).",
 };
 
 export default async function DocumentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ new?: string }> }) {

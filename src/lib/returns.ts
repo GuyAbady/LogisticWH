@@ -19,7 +19,7 @@ export class ReturnError extends Error {
 type Tx = Prisma.TransactionClient;
 type Actor = { id: string; role: Role; unitId: string; fullName: string };
 
-const ROLE_HE: Record<Role, string> = { EMPLOYEE: "עובד", UNIT_MANAGER: "מנהל יחידה", WAREHOUSE_MANAGER: 'מנהל מרלו"ג', ADMIN: "מנהל מערכת" };
+export const ROLE_HE: Record<Role, string> = { EMPLOYEE: "עובד", UNIT_MANAGER: "מנהל יחידה", WAREHOUSE_MANAGER: 'מנהל מרלו"ג', ADMIN: "מנהל מערכת" };
 
 /** יצירת רשומת חתימה למסמך כללי (משותף לזיכוי ולפעולות מרוכזות) */
 export async function createSignedDoc(
@@ -34,6 +34,7 @@ export async function createSignedDoc(
     imageData: string;
     ipAddress: string | null;
     userAgent: string | null;
+    terms?: string;
   },
 ) {
   const doc: GenericDoc = {
@@ -44,7 +45,7 @@ export async function createSignedDoc(
     unit: p.unit,
     lines: p.lines,
     reference: p.reference,
-    terms: DOC_TERMS[p.type],
+    terms: p.terms ?? DOC_TERMS[p.type],
   };
   const documentJson = canonicalGeneric(doc);
   const sig = await tx.signature.create({
