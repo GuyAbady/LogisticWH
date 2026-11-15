@@ -21,7 +21,7 @@ export function AssignmentTable({ rows, show = { user: true, unit: true, item: t
   if (!rows.length) return <EmptyState text="אין ציוד משויך" />;
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[640px] text-sm">
+      <table className="table-base min-w-[640px]">
         <thead className="text-right text-slate-500">
           <tr className="border-b border-slate-200">
             {show.unit && <th className="py-2">יחידה</th>}
@@ -37,23 +37,23 @@ export function AssignmentTable({ rows, show = { user: true, unit: true, item: t
           {rows.map((r) => (
             <tr key={`${r.kind}-${r.serialId ?? r.catalogItemId}-${r.userId}`} className="border-b border-slate-100">
               {show.unit && (
-                <td className="py-2"><Link className="text-brand-700 hover:underline" href={`/warehouse/lookup/unit/${r.unitId}`}>{r.unitName}</Link></td>
+                <td className="py-2"><Link className="link" href={`/warehouse/lookup/unit/${r.unitId}`}>{r.unitName}</Link></td>
               )}
               {show.user && (
                 <td className="py-2">
-                  <Link className="text-brand-700 hover:underline" href={`/warehouse/lookup/user/${r.userId}`}>{r.userName}</Link>
+                  <Link className="link" href={`/warehouse/lookup/user/${r.userId}`}>{r.userName}</Link>
                   <span className="mr-1 text-xs text-slate-500">({r.employeeNumber})</span>
                 </td>
               )}
               {show.item && (
                 <td className="py-2">
-                  <Link className="text-brand-700 hover:underline" href={`/warehouse/inventory/${r.catalogItemId}`}>{r.itemName}</Link>
+                  <Link className="link" href={`/warehouse/inventory/${r.catalogItemId}`}>{r.itemName}</Link>
                   <span className="ltr mr-1 inline-block font-mono text-xs text-slate-500">{r.sku}</span>
                 </td>
               )}
               <td className="py-2">
                 {r.serialId ? (
-                  <Link className="ltr inline-block font-mono text-brand-700 hover:underline" href={`/warehouse/lookup/serial/${r.serialId}`}>{r.serialNumber}</Link>
+                  <Link className="ltr inline-block font-mono link" href={`/warehouse/lookup/serial/${r.serialId}`}>{r.serialNumber}</Link>
                 ) : "—"}
               </td>
               <td>{r.quantity}</td>

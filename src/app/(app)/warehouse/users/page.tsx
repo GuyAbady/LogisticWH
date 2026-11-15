@@ -75,7 +75,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
 
       <section className="card overflow-x-auto">
         <h2 className="mb-3 font-bold">משתמשים ({users.length})</h2>
-        <table className="w-full min-w-[720px] text-sm">
+        <table className="table-base min-w-[720px]">
           <thead className="text-right text-slate-500">
             <tr className="border-b border-slate-200"><th className="py-2">שם</th><th>תפקיד</th><th>יחידה</th><th>יצירת קשר</th><th>פעולות</th></tr>
           </thead>
@@ -83,7 +83,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
             {users.map((u) => (
               <tr key={u.id} className={`border-b border-slate-100 align-top ${u.isActive ? "" : "opacity-60"}`}>
                 <td className="py-2">
-                  <Link href={`/warehouse/lookup/user/${u.id}`} className="font-bold text-brand-700 hover:underline">{u.fullName}</Link>
+                  <Link href={`/warehouse/lookup/user/${u.id}`} className="link">{u.fullName}</Link>
                   <p className="text-xs text-slate-500">מספר עובד {u.employeeNumber}{!u.isActive && " · לא פעיל"}</p>
                 </td>
                 <td className="py-2">{ROLE_LABELS[u.role]}</td>
@@ -92,16 +92,16 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
                 <td className="py-2">
                   {u.id !== me.id && (
                     <div className="flex flex-wrap gap-2">
-                      <ActionForm action={setUserActive} submitLabel={u.isActive ? "השבת" : "הפעל"} className="contents" buttonClassName="btn-secondary px-2 py-1 text-xs"
+                      <ActionForm action={setUserActive} submitLabel={u.isActive ? "השבת" : "הפעל"} className="contents" buttonClassName="btn-secondary min-h-9 px-2.5 text-xs"
                         confirmText={u.isActive ? `להשבית את ${u.fullName}? הוא לא יוכל להתחבר.` : undefined}>
                         <input type="hidden" name="userId" value={u.id} />
                         <input type="hidden" name="active" value={String(!u.isActive)} />
                       </ActionForm>
                       <details>
-                        <summary className="btn-secondary cursor-pointer px-2 py-1 text-xs">איפוס סיסמה</summary>
-                        <ActionForm action={resetUserPassword} submitLabel="אפס" resetOnSuccess className="mt-2 flex gap-1" buttonClassName="btn-primary px-2 py-1 text-xs">
+                        <summary className="btn-secondary min-h-9 px-2.5 text-xs list-none">איפוס סיסמה</summary>
+                        <ActionForm action={resetUserPassword} submitLabel="אפס" resetOnSuccess className="mt-2 flex gap-1" buttonClassName="btn-primary min-h-9 px-2.5 text-xs">
                           <input type="hidden" name="userId" value={u.id} />
-                          <input name="password" required placeholder="סיסמה זמנית" className="input ltr w-36 px-2 py-1 text-xs" autoComplete="new-password" />
+                          <input name="password" required placeholder="סיסמה זמנית" className="input ltr min-h-9 w-36 px-2 py-1 text-xs" autoComplete="new-password" />
                         </ActionForm>
                       </details>
                     </div>

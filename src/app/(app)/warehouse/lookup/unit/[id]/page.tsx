@@ -41,7 +41,7 @@ export default async function UnitFolder({ params }: { params: Promise<{ id: str
           <ul className="divide-y divide-slate-100 text-sm">
             {[...byItem.values()].map((i) => (
               <li key={i.id} className="flex justify-between py-2">
-                <Link href={`/warehouse/inventory/${i.id}`} className="text-brand-700 hover:underline">{i.name}</Link>
+                <Link href={`/warehouse/inventory/${i.id}`} className="link">{i.name}</Link>
                 <span className="font-bold">{i.qty}</span>
               </li>
             ))}
@@ -53,7 +53,7 @@ export default async function UnitFolder({ params }: { params: Promise<{ id: str
           <ul className="divide-y divide-slate-100 text-sm">
             {unit.users.map((u) => (
               <li key={u.id} className="flex justify-between py-2">
-                <Link href={`/warehouse/lookup/user/${u.id}`} className="text-brand-700 hover:underline">
+                <Link href={`/warehouse/lookup/user/${u.id}`} className="link">
                   {u.fullName} <span className="text-xs text-slate-500">({u.employeeNumber})</span>
                 </Link>
                 <span className="text-xs text-slate-500">{ROLE_LABELS[u.role]}{!u.isActive && " · לא פעיל"}</span>

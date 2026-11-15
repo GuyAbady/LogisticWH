@@ -60,7 +60,7 @@ export default async function WarehouseHome() {
         <section className="card">
           <h2 className="mb-3 font-bold">מצב מלאי לפי פריט</h2>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="table-base">
               <thead className="text-right text-slate-500">
                 <tr><th className="py-2">פריט</th><th>סוג</th><th>במחסן</th><th>משויך</th></tr>
               </thead>
@@ -68,7 +68,7 @@ export default async function WarehouseHome() {
                 {items.map((i) => (
                   <tr key={i.id} className="border-t border-slate-100">
                     <td className="py-2">
-                      <Link href={`/warehouse/inventory/${i.id}`} className="font-bold text-brand-700 hover:underline">{i.name}</Link>
+                      <Link href={`/warehouse/inventory/${i.id}`} className="link">{i.name}</Link>
                       <p className="ltr text-right font-mono text-xs text-slate-500">{i.sku}</p>
                     </td>
                     <td>{i.requiresSerial ? "סידורי" : "כמותי"}</td>

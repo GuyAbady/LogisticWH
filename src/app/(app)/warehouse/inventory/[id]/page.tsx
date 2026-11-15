@@ -58,7 +58,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
             <ul className="divide-y divide-slate-100 text-sm">
               {loc.byUnit.map((u) => (
                 <li key={u.unitId} className="flex justify-between py-2">
-                  <Link href={`/warehouse/lookup/unit/${u.unitId}`} className="text-brand-700 hover:underline">{u.unitName}</Link>
+                  <Link href={`/warehouse/lookup/unit/${u.unitId}`} className="link">{u.unitName}</Link>
                   <span className="font-bold">{u.quantity}</span>
                 </li>
               ))}
@@ -68,7 +68,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
 
         <section className="card">
           <h2 className="mb-2 font-bold">קליטת מלאי</h2>
-          <ActionForm action={receiveStock} submitLabel="קלוט למלאי" resetOnSuccess>
+          <ActionForm action={receiveStock} submitLabel="קלוט למלאי" resetOnSuccess buttonClassName="btn-accent">
             <input type="hidden" name="catalogItemId" value={item.id} />
             {item.requiresSerial ? (
               <div>
@@ -132,20 +132,31 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
               {serials.map((s) => (
                 <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                   <span className="flex items-center gap-2">
-                    <Link href={`/warehouse/lookup/serial/${s.id}`} className="ltr inline-block font-mono font-bold text-brand-700 hover:underline">{s.serialNumber}</Link>
+                    <Link href={`/warehouse/lookup/serial/${s.id}`} className="ltr inline-block font-mono link">{s.serialNumber}</Link>
                     <SerialBadge status={s.status} />
                     {s.holder && <Link href={`/warehouse/lookup/user/${s.holder.id}`} className="text-slate-600 hover:underline">{s.holder.fullName}</Link>}
                   </span>
                   <span className="flex flex-wrap gap-1">
-                    {allowedSerialTransitions(s.status).map((t) => (
-                      <ActionForm key={t.to} action={setSerialStatus} submitLabel={TRANSITION_LABEL[t.to as keyof typeof TRANSITION_LABEL]}
-                        className="flex items-center gap-1" buttonClassName={t.to === "WRITTEN_OFF" ? "btn-secondary px-2 py-1 text-xs text-red-700" : "btn-secondary px-2 py-1 text-xs"}
-                        confirmText={t.to === "WRITTEN_OFF" ? `לגרוע את ${s.serialNumber}? פעולה סופית.` : undefined}>
-                        <input type="hidden" name="serialId" value={s.id} />
-                        <input type="hidden" name="to" value={t.to} />
-                        {t.to === "WRITTEN_OFF" && <input name="note" required placeholder="סיבה" className="input w-28 px-2 py-1 text-xs" />}
-                      </ActionForm>
-                    ))}
+                    {allowedSerialTransitions(s.status).map((t) =>
+                      t.to === "WRITTEN_OFF" ? (
+                        // גריעה היא פעולה סופית: שדה הסיבה נפתח רק כשבוחרים בה (Progressive disclosure)
+                        <details key={t.to} className="group">
+                          <summary className="btn-danger min-h-9 list-none px-2.5 text-xs">גריעה</summary>
+                          <ActionForm action={setSerialStatus} submitLabel="אשר גריעה" className="mt-2 flex items-center gap-1"
+                            buttonClassName="btn-danger min-h-9 px-2.5 text-xs" confirmText={`לגרוע את ${s.serialNumber}? פעולה סופית.`}>
+                            <input type="hidden" name="serialId" value={s.id} />
+                            <input type="hidden" name="to" value={t.to} />
+                            <input name="note" required placeholder="סיבת גריעה" aria-label="סיבת גריעה" className="input min-h-9 w-32 px-2 py-1 text-xs" />
+                          </ActionForm>
+                        </details>
+                      ) : (
+                        <ActionForm key={t.to} action={setSerialStatus} submitLabel={TRANSITION_LABEL[t.to as keyof typeof TRANSITION_LABEL]}
+                          className="flex items-center gap-1" buttonClassName="btn-secondary min-h-9 px-2.5 text-xs">
+                          <input type="hidden" name="serialId" value={s.id} />
+                          <input type="hidden" name="to" value={t.to} />
+                        </ActionForm>
+                      ),
+                    )}
                   </span>
                 </li>
               ))}

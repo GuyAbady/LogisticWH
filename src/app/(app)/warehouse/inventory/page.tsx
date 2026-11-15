@@ -51,7 +51,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
         <EmptyState text="לא נמצאו פריטים" />
       ) : (
         <div className="card overflow-x-auto p-0">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="table-base min-w-[640px]">
             <thead className="bg-slate-50 text-right text-slate-500">
               <tr>
                 <th className="p-3">פריט</th><th>קטגוריה</th><th>סוג</th><th>סה&quot;כ</th><th>במחסן</th><th>בתיקון</th><th>משויך</th>
@@ -64,7 +64,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
                 return (
                   <tr key={i.id} className="border-t border-slate-100 hover:bg-slate-50">
                     <td className="p-3">
-                      <Link href={`/warehouse/inventory/${i.id}`} className="font-bold text-brand-700 hover:underline">{i.name}</Link>
+                      <Link href={`/warehouse/inventory/${i.id}`} className="link">{i.name}</Link>
                       <p className="ltr text-right font-mono text-xs text-slate-500">{i.sku}</p>
                       {!i.isActive && <span className="badge bg-slate-200 text-slate-600">לא פעיל</span>}
                     </td>

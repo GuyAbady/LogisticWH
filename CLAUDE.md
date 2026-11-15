@@ -23,6 +23,17 @@
 - חתימה מרוכזת של מנהל יחידה: `requiresAck=true`; האחריות עוברת לעובד רק לאחר `ackAt`.
 - מנהל יחידה רואה/פועל רק על עובדי היחידה שלו – לסנן תמיד לפי `user.unitId` מהשרת.
 
+## מערכת עיצוב
+- סקילים בפרויקט (`.claude/skills/`, מקורות ב-`SOURCES.md`): `ui-ux-pro-max`, `emil-design-eng`,
+  `review-animations`, `animation-performance`, `animate`. להשתמש בהם בכל שינוי ממשק.
+- סגנון: Flat/Minimal לכלי ארגוני. Primary = slate (`brand-*`), Accent = ירוק מלאי (`accent-*`, 600=#047857).
+  ניגודיות טקסט ≥ 4.5:1 (AA). לא להשתמש ב-#059669 עם טקסט לבן (3.77:1).
+- רכיבים: `card`, `btn-primary|accent|secondary|danger`, `input`, `label`, `badge`, `link`, `table-base`, `feedback-enter` (globals.css).
+- תנועה: כפתור `scale(0.97)` ב-160ms `--ease-out`; אין אנימציה לניווט/פעולות תכופות; רק transform/opacity;
+  הודעות משוב 200ms; לכבד `prefers-reduced-motion`. hover ב-Tailwind v4 פעיל רק במכשירים עם hover.
+- יעד מגע ≥ 44px (`min-h-11`), כפתורים קטנים בטבלאות `min-h-9`; פוקוס גלוי (`:focus-visible`).
+- גופן: Arial בלבד (Lexend שהסקיל הציע – לא תומך בעברית).
+
 ## מוסכמות קוד (שלב 2)
 - לוגיקת מלאי: `src/lib/inventory.ts`. מוני פריט סידורי מחושבים מחדש מהסידוריים (`recalcSerialCounters`).
 - שאילתות איתור/דוחות: `src/lib/reports.ts` – משמשות גם את המסכים וגם את הייצוא (מקור אחד).

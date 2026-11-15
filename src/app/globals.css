@@ -1,24 +1,50 @@
 @import "tailwindcss";
 
-/* פונט: Arial (לפי דרישת המשתמש) – פונט מערכת, ללא טעינה חיצונית */
+/*
+ * מערכת העיצוב של LogisticWH
+ * מקורות: ui-ux-pro-max (Flat/Minimal לכלי ארגוני, פלטת "Industrial slate + stock green"),
+ * Emil Kowalski – emil-design-eng (easing, משך, משוב לחיצה, reduced-motion).
+ * הפונט Arial לפי דרישת המשתמש (Lexend שהוצע אינו תומך בעברית).
+ */
 @theme {
   --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-600: #1d4ed8;
-  --color-brand-700: #1e40af;
-  --color-brand-900: #172554;
+
+  /* Primary – Slate תעשייתי (בשם brand כדי לשמור תאימות למחלקות קיימות) */
+  --color-brand-50: #f1f5f9;
+  --color-brand-100: #e2e8f0;
+  --color-brand-600: #1e293b; /* לבן עליו: 14.6:1 */
+  --color-brand-700: #0f172a;
+  --color-brand-900: #020617;
+
+  /* Accent – "ירוק מלאי". 700 ולא 600: לבן על #059669 = 3.8:1 (נכשל AA), על #047857 = 5.5:1 */
+  --color-accent-50: #ecfdf5;
+  --color-accent-100: #d1fae5;
+  --color-accent-600: #047857;
+  --color-accent-700: #065f46;
+
+  /* Easing מותאם – עקומות ה-CSS המובנות חלשות מדי (Emil Kowalski) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 :root {
   color-scheme: light;
+  --surface: #f8fafc;
+  --text: #0f172a;
+  --text-muted: #475569; /* על #f8fafc: 7.2:1 */
 }
 
 html,
 body {
   font-family: var(--font-sans);
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--surface);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* מספרים בעמודות וכרטיסי סטטיסטיקה מיושרים */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 /* שדות מספר/דוא"ל/טלפון נשארים LTR גם בממשק RTL */
@@ -29,25 +55,107 @@ input[type="tel"],
   text-align: right;
 }
 
-/* רכיבי עיצוב משותפים (Tailwind v4: @utility מאפשר @apply ביניהם) */
-@utility card {
-  @apply rounded-xl border border-slate-200 bg-white p-4 shadow-sm;
+/* טבעת פוקוס גלויה לניווט מקלדת בלבד (ui-ux-pro-max: Focus States) */
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
+
+/* ───── רכיבים (Tailwind v4: @utility מאפשר @apply ביניהם) ───── */
+
+@utility card {
+  @apply rounded-xl border border-slate-200 bg-white p-4 md:p-5;
+}
+
+/*
+ * כפתור: משוב לחיצה scale(0.97) ב-160ms עם ease-out מותאם.
+ * רק transform ו-background מונפשים (לא "all"). גובה מינימלי 44px – יעד מגע נוח.
+ * hover ב-Tailwind v4 פעיל רק במכשירים שתומכים ב-hover, כך שאין "hover דביק" בנייד.
+ */
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold select-none disabled:cursor-not-allowed disabled:opacity-50;
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 150ms ease,
+    border-color 150ms ease;
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
 }
 @utility btn-primary {
   @apply btn bg-brand-600 text-white hover:bg-brand-700;
 }
-@utility btn-secondary {
-  @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50;
+@utility btn-accent {
+  @apply btn bg-accent-600 text-white hover:bg-accent-700;
 }
+@utility btn-secondary {
+  @apply btn border border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50;
+}
+@utility btn-danger {
+  @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50;
+}
+
 @utility input {
-  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100;
+  @apply min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 placeholder:text-slate-400;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+  &:focus {
+    outline: none;
+    border-color: var(--color-brand-600);
+    box-shadow: 0 0 0 3px var(--color-brand-100);
+  }
 }
 @utility label {
-  @apply mb-1 block text-sm font-bold text-slate-700;
+  @apply mb-1.5 block text-sm font-bold text-slate-700;
 }
 @utility badge {
-  @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold;
+  @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold whitespace-nowrap;
+}
+
+/* קישור: ניטרלי עם קו תחתון עדין שמתחזק ב-hover */
+@utility link {
+  @apply font-bold text-slate-900 underline decoration-slate-300 decoration-1 underline-offset-4 hover:decoration-slate-900;
+  transition: text-decoration-color 150ms ease;
+}
+
+/* טבלה: כותרת שקטה, שורות עם hover, מספרים מיושרים */
+@utility table-base {
+  @apply w-full text-sm tabular-nums;
+  & thead th {
+    @apply border-b border-slate-200 px-3 py-2.5 text-right text-xs font-bold whitespace-nowrap text-slate-500;
+  }
+  & tbody td {
+    @apply border-b border-slate-100 px-3 py-2.5 align-middle;
+  }
+  & tbody tr {
+    @apply hover:bg-slate-50;
+  }
+}
+
+/*
+ * הודעות משוב (הצלחה/שגיאה): כניסה עדינה ב-200ms. מופיעות לעיתים, ולכן מותר להנפיש;
+ * ניווט ופעולות תכופות אינם מונפשים כלל (Animation Decision Framework).
+ */
+@utility feedback-enter {
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
+  @starting-style {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* פחות תנועה: ללא תזוזה/קנה מידה, נשארים מעברי צבע ושקיפות בלבד */
+@media (prefers-reduced-motion: reduce) {
+  [class*="btn"]:active {
+    transform: none !important;
+  }
+  .feedback-enter {
+    @starting-style {
+      transform: none;
+    }
+  }
 }

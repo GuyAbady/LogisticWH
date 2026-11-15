@@ -1,7 +1,7 @@
 "use client";
 
 import { startTransition, useActionState, useEffect, useRef } from "react";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import type { ActionResult } from "@/lib/action-result";
 
 type Props = {
@@ -44,16 +44,17 @@ export default function ActionForm({
     >
       {children}
       {state?.error && (
-        <p role="alert" className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <p role="alert" className="feedback-enter flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           <AlertCircle className="mt-0.5 size-4 shrink-0" /> {state.error}
         </p>
       )}
       {state?.ok && (
-        <p role="status" className="flex items-start gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
+        <p role="status" className="feedback-enter flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
           <CheckCircle2 className="mt-0.5 size-4 shrink-0" /> {state.ok}
         </p>
       )}
-      <button type="submit" disabled={pending} className={buttonClassName ?? "btn-primary"}>
+      <button type="submit" disabled={pending} aria-busy={pending} className={buttonClassName ?? "btn-primary"}>
+        {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
         {pending ? pendingLabel : submitLabel}
       </button>
     </form>

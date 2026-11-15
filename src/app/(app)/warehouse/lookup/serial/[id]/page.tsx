@@ -30,12 +30,12 @@ export default async function SerialPage({ params }: { params: Promise<{ id: str
         <div>
           <p className="text-sm text-slate-500">מחזיק נוכחי</p>
           {serial.holder ? (
-            <Link href={`/warehouse/lookup/user/${serial.holder.id}`} className="font-bold text-brand-700 hover:underline">
+            <Link href={`/warehouse/lookup/user/${serial.holder.id}`} className="link">
               {serial.holder.fullName} · {serial.holder.unit.name}
             </Link>
           ) : <p className="font-bold">מחסן</p>}
         </div>
-        <div><p className="text-sm text-slate-500">פריט</p><Link href={`/warehouse/inventory/${serial.catalogItemId}`} className="font-bold text-brand-700 hover:underline">לכרטיס הפריט</Link></div>
+        <div><p className="text-sm text-slate-500">פריט</p><Link href={`/warehouse/inventory/${serial.catalogItemId}`} className="link">לכרטיס הפריט</Link></div>
       </section>
       <section className="card">
         <h2 className="mb-3 font-bold">היסטוריית החזקה ותנועות</h2>
