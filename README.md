@@ -26,9 +26,15 @@ npm run dev                 # http://localhost:3000
 1. ייבוא הריפו ב-Vercel.
 2. **Storage → Create Database → Neon (Postgres)** וחיבור לפרויקט. Vercel יגדיר אוטומטית
    `DATABASE_URL` (Pooled) ו-`DATABASE_URL_UNPOOLED` (ישיר, משמש ל-migrations).
-3. להוסיף משתנה סביבה `SESSION_SECRET` (לפחות 32 תווים; `openssl rand -base64 32`).
+3. להוסיף משתני סביבה:
+   - `SESSION_SECRET` – לפחות 32 תווים אקראיים (`openssl rand -base64 32`).
+   - `SETUP_TOKEN` – לפחות 16 תווים, קוד חד-פעמי להקמה ראשונית.
 4. Deploy. הסקריפט `vercel-build` מריץ `prisma migrate deploy` ואז `next build`.
-5. **לא** להריץ `db:seed` בייצור (הסקריפט חוסם זאת). יש ליצור משתמש מנהל ראשון ידנית.
+5. **הקמה ראשונית:** לגלוש אל `https://<הדומיין>/setup`, להזין את `SETUP_TOKEN` וליצור את מנהל המרלו"ג הראשון.
+   - הדף פעיל רק כשאין אף משתמש במערכת וכש-`SETUP_TOKEN` מוגדר; לאחר היצירה הוא נסגר אוטומטית.
+   - מוגן בהשוואה בזמן קבוע, חסימה אחרי 5 כישלונות ב-15 דקות, ונעילת DB נגד יצירה כפולה במקביל.
+   - **אחרי ההקמה: למחוק את `SETUP_TOKEN` מ-Vercel** (ואז ה-Deploy הבא מכבה את הדף לחלוטין).
+6. **לא** להריץ `db:seed` בייצור (הסקריפט חוסם זאת).
 
 > הערה: "Vercel Postgres" הופסק והועבר ל-Neon בדצמבר 2024; כיום מסד הנתונים מוקם דרך Vercel Marketplace.
 > מקורות: [Vercel Docs – Postgres](https://vercel.com/docs/postgres), [Prisma – Deploy to Vercel](https://www.prisma.io/docs/orm/prisma-client/deployment/edge/deploy-to-vercel).

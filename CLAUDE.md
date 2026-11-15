@@ -23,6 +23,11 @@
 - חתימה מרוכזת של מנהל יחידה: `requiresAck=true`; האחריות עוברת לעובד רק לאחר `ackAt`.
 - מנהל יחידה רואה/פועל רק על עובדי היחידה שלו – לסנן תמיד לפי `user.unitId` מהשרת.
 
+## הקמה ראשונית
+- `/setup` – יצירת מנהל מרלו"ג ראשון. פעיל רק אם `SETUP_TOKEN` (16+ תווים) מוגדר **ו**אין משתמשים.
+- לוגיקה: `src/lib/setup.ts` (server-only) + `src/app/actions/setup.ts`.
+- אין לייצא מקובץ `"use server"` פונקציות עזר – כל ייצוא שם הוא נקודת קצה ציבורית.
+
 ## פקודות
 - `npm run dev` · `npm run build` · `npm run typecheck` · `npm run lint`
 - `npm run db:migrate` · `npm run db:seed` (סיסמת דוגמה: `Demo1234!`)
