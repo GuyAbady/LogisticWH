@@ -36,6 +36,11 @@ npm run dev                 # http://localhost:3000
    - **אחרי ההקמה: למחוק את `SETUP_TOKEN` מ-Vercel** (ואז ה-Deploy הבא מכבה את הדף לחלוטין).
 6. **לא** להריץ `db:seed` בייצור (הסקריפט חוסם זאת).
 
+### מצב משתני סביבה ב-Vercel
+- `SETUP_TOKEN` (Production): מנוטרל – ערך קצר מ-16 תווים, ולכן `/setup` כבוי גם אם ה-DB יתרוקן. למחיקה מלאה: Settings → Environment Variables.
+- `SESSION_SECRET`: ערך נפרד ל-Production ול-Preview – אסימון כניסה של Preview אינו תקף בייצור.
+- Preview מקבל branch נפרד של בסיס הנתונים ב-Neon (עותק של ייצור בעת יצירת ה-branch) – כניסה עם משתמשי הייצור.
+
 ### כתובת ייצור והגנת גישה
 - כתובת הייצור: **https://logisticwh.vercel.app** (ציבורית; העובדים נכנסים דרך מסך הכניסה של המערכת).
 - Settings → Deployment Protection: **Standard Protection** – כתובות Preview נעולות בהתחברות Vercel.
