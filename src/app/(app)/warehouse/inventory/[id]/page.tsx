@@ -8,6 +8,7 @@ import { adjustStock, receiveStock, setSerialStatus } from "@/app/actions/invent
 import { PageHeader, StatCard, SerialBadge, EmptyState } from "@/components/ui";
 import { AssignmentTable, ExportButton, HistoryList } from "@/components/data";
 import ActionForm from "@/components/ActionForm";
+import ScanButton from "@/components/ScanButton";
 
 export const metadata = { title: "כרטיס פריט" };
 
@@ -72,7 +73,10 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
             <input type="hidden" name="catalogItemId" value={item.id} />
             {item.requiresSerial ? (
               <div>
-                <label className="label" htmlFor="serials">מספרים סידוריים</label>
+                <div className="mb-1.5 flex items-end justify-between gap-2">
+                  <label className="label mb-0" htmlFor="serials">מספרים סידוריים</label>
+                  <ScanButton targetId="serials" mode="append" label="סריקה רציפה" />
+                </div>
                 <textarea id="serials" name="serials" rows={4} required className="input ltr font-mono" placeholder={"DL-2001\nDL-2002"} />
                 <p className="mt-1 text-xs text-slate-500">מספר בכל שורה (או מופרדים בפסיק). עד 500 בפעולה.</p>
               </div>

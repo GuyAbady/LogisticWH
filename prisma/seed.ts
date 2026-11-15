@@ -171,6 +171,9 @@ async function main() {
   await issueQty("GLV-001", 4, opsEmp1.id);
   await issueQty("HLM-001", 1, opsEmp2.id);
   await issueQty("CBL-001", 2, itEmp1.id);
+  // ציוד על מנהל היחידה – לחלוקה מרוכזת (שלב 4)
+  await issueSerial("RAD-001", 2, itManager.id);
+  await issueQty("CBL-001", 6, itManager.id);
 
   // ── בקשות לדוגמה ──
   await db.equipmentRequest.create({

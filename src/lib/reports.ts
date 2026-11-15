@@ -41,6 +41,7 @@ export type AssignmentRow = {
   quantity: number;
   pendingAckQty: number;
   status: string;
+  serialStatus: SerialStatus | null;
   userId: string;
   userName: string;
   employeeNumber: string;
@@ -108,6 +109,7 @@ export async function getAssignments(f: AssignmentFilter = {}): Promise<Assignme
       quantity: 1,
       pendingAckQty: s.status === "PENDING_ACK" ? 1 : 0,
       status: SERIAL_STATUS_LABELS[s.status],
+      serialStatus: s.status,
       userId: s.holder!.id,
       userName: s.holder!.fullName,
       employeeNumber: s.holder!.employeeNumber,
@@ -126,6 +128,7 @@ export async function getAssignments(f: AssignmentFilter = {}): Promise<Assignme
       quantity: h.quantity,
       pendingAckQty: h.pendingAckQty,
       status: h.pendingAckQty > 0 ? "חלקי – ממתין לאישור" : "חתום",
+      serialStatus: null,
       userId: h.user.id,
       userName: h.user.fullName,
       employeeNumber: h.user.employeeNumber,

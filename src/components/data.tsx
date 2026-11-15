@@ -3,6 +3,7 @@ import { FileSpreadsheet } from "lucide-react";
 import type { AssignmentRow } from "@/lib/reports";
 import { TX_LABELS } from "@/lib/reports";
 import { EmptyState, fmtDate, fmtDateTime } from "./ui";
+import ScanButton from "./ScanButton";
 
 /** כפתור הורדת Excel – קישור רגיל לנתיב הייצוא (ההרשאה נבדקת בשרת) */
 export function ExportButton({ report, id, label = "ייצוא ל-Excel" }: { report: string; id?: string; label?: string }) {
@@ -104,10 +105,11 @@ export function HistoryList({ items, showItem = true }: { items: HistoryItem[]; 
 }
 
 /** טופס חיפוש GET – עובד ללא JavaScript */
-export function SearchBox({ action, defaultValue, placeholder }: { action: string; defaultValue?: string; placeholder: string }) {
+export function SearchBox({ action, defaultValue, placeholder, scan }: { action: string; defaultValue?: string; placeholder: string; scan?: boolean }) {
   return (
     <form action={action} className="flex gap-2">
-      <input name="q" defaultValue={defaultValue} placeholder={placeholder} className="input" minLength={2} autoComplete="off" />
+      <input id="search-q" name="q" defaultValue={defaultValue} placeholder={placeholder} aria-label="חיפוש" className="input" minLength={2} autoComplete="off" />
+      {scan && <ScanButton targetId="search-q" mode="fill" submit label="סריקה" />}
       <button className="btn-primary shrink-0">חיפוש</button>
     </form>
   );

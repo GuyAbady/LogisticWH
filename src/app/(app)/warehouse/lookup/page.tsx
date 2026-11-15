@@ -32,7 +32,7 @@ export default async function LookupPage({ searchParams }: { searchParams: Promi
         subtitle='חיפוש לפי שם עובד, מספר עובד, יחידה, מק"ט, שם פריט או מספר סידורי'
         actions={<div className="flex flex-wrap gap-2"><ExportButton report="assignments" label="כל השיוכים" /><ExportButton report="transactions" label="יומן תנועות" /></div>}
       />
-      <div className="mb-6"><SearchBox action="/warehouse/lookup" defaultValue={q} placeholder="לדוגמה: אבי / 2002 / LAP-001 / DL-1001" /></div>
+      <div className="mb-6"><SearchBox action="/warehouse/lookup" defaultValue={q} placeholder="לדוגמה: אבי / 2002 / LAP-001 / DL-1001" scan /></div>
 
       {q && q.length < 2 && <EmptyState text="יש להזין לפחות 2 תווים" />}
       {res && total === 0 && <EmptyState text={`לא נמצאו תוצאות עבור "${q}"`} />}
