@@ -63,3 +63,74 @@ export function validateSignatureImage(dataUrl: string) {
   if (!(head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4e && head[3] === 0x47)) return "פורמט חתימה לא תקין";
   return null;
 }
+
+// ───────── מסמכים נוספים (שלב 4) ─────────
+// מבנה כללי לטופסי זיכוי, חלוקה/איסוף מרוכזים ואישור עובד. RECEIPT נשאר במבנה המקורי
+// כדי שקבלות קיימות ימשיכו לעבור אימות.
+
+export type DocType = "RETURN" | "BULK_TRANSFER" | "BULK_COLLECT" | "ACK";
+
+export const DOC_TITLES: Record<DocType | "RECEIPT", string> = {
+  RECEIPT: "קבלה דיגיטלית על קבלת ציוד",
+  RETURN: "טופס אישור החזרת ציוד (זיכוי)",
+  BULK_TRANSFER: "החתמה מרוכזת – חלוקת ציוד ע\"י מנהל היחידה",
+  BULK_COLLECT: "זיכוי מרוכז – איסוף ציוד ע\"י מנהל היחידה",
+  ACK: "אישור עובד לקבלת ציוד שחולק ע\"י מנהל היחידה",
+};
+
+export const DOC_TERMS: Record<DocType, string> = {
+  RETURN: "המרלו\"ג מאשר כי הציוד המפורט לעיל הוחזר ונקלט במלאי, והעובד זוכה מאחריותו לציוד זה.",
+  BULK_TRANSFER:
+    "מנהל היחידה מאשר כי חילק את הציוד המפורט לעובדים הרשומים. עד לאישור כל עובד, האחריות לציוד נשארת על מנהל היחידה.",
+  BULK_COLLECT: "מנהל היחידה מאשר כי אסף מהעובדים את הציוד המפורט והוא באחריותו. העובדים זוכו מאחריותם לציוד זה.",
+  ACK: "אני מאשר/ת כי קיבלתי לידי את הציוד המפורט לעיל ממנהל היחידה, וכי מעתה הוא באחריותי האישית.",
+};
+
+export type DocLine = {
+  employeeId: string;
+  employeeName: string;
+  employeeNumber: string;
+  sku: string;
+  name: string;
+  serialNumber: string | null;
+  quantity: number;
+  condition: string | null;
+};
+
+export type GenericDoc = {
+  type: DocType;
+  version: 1;
+  signedAt: string;
+  signer: { id: string; fullName: string; role: string };
+  unit: string | null;
+  lines: DocLine[];
+  reference: string | null;
+  terms: string;
+};
+
+export function canonicalGeneric(doc: GenericDoc) {
+  return JSON.stringify({
+    type: doc.type,
+    version: doc.version,
+    signedAt: doc.signedAt,
+    signer: { id: doc.signer.id, fullName: doc.signer.fullName, role: doc.signer.role },
+    unit: doc.unit,
+    lines: doc.lines.map((l) => ({
+      employeeId: l.employeeId, employeeName: l.employeeName, employeeNumber: l.employeeNumber,
+      sku: l.sku, name: l.name, serialNumber: l.serialNumber, quantity: l.quantity, condition: l.condition,
+    })),
+    reference: doc.reference,
+    terms: doc.terms,
+  });
+}
+
+/** אימות לכל סוגי המסמכים */
+export function verifyDocument(documentJson: string, documentHash: string) {
+  try {
+    const doc = JSON.parse(documentJson) as { type: string };
+    if (doc.type === "RECEIPT") return verifyReceipt(documentJson, documentHash);
+    return sha256(canonicalGeneric(doc as GenericDoc)) === documentHash;
+  } catch {
+    return false;
+  }
+}

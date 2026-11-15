@@ -50,6 +50,17 @@
 - התראות: `src/lib/notify.ts` – SMTP (Nodemailer) ו-Webhook SMS עם HMAC; אופציונליים, כשל לא מבטל פעולה. תוכן מה-DB עובר escapeHtml.
 - זמן: `src/lib/time.ts` – datetime-local מתפרש כשעון ישראל (שרתי Vercel ב-UTC).
 
+## מוסכמות קוד (שלב 4)
+- החזרות: `src/lib/returns.ts` – זימון (סידורי → PENDING_RETURN), קליטה עם חתימת מרלו"ג → מסמך RETURN.
+  פגום: סידורי → IN_REPAIR (+REPAIR_OUT), כמותי → גריעה (+WRITE_OFF). הזימונים נסגרים אוטומטית.
+- מרוכז: `src/lib/bulk.ts` – חלוקה מציוד המנהל (TRANSFER requiresAck, סידורי PENDING_ACK, כמותי pendingAckQty);
+  אישור עובד (ACK) מעדכן רק `ackAt/ackSignatureId`; דחייה → תנועה הפוכה. איסוף (BULK_COLLECT) מזכה עובדים.
+- מסמכים: `receipt.ts` – RECEIPT במבנה המקורי; RETURN/BULK_TRANSFER/BULK_COLLECT/ACK ב-`canonicalGeneric`.
+  `/receipts/[id]` – גישה: החותם, עובד שמופיע במסמך, מרלו"ג, מנהל יחידה רלוונטי.
+- סריקה: `src/components/ScanButton.tsx` (@zxing/browser 0.2.1, נטען בלחיצה). מצבים fill/append/check (`data-scan`).
+  בדיקה אוטומטית: Chromium עם `--use-file-for-fake-video-capture` ווידאו Y4M עם ברקוד Code128.
+- Node מקובע ל-`22.x` ב-engines (Vercel הזהיר ש->=22.12 ישודרג אוטומטית לגרסה ראשית חדשה).
+
 ## הקמה ראשונית
 - `/setup` – יצירת מנהל מרלו"ג ראשון. פעיל רק אם `SETUP_TOKEN` (16+ תווים) מוגדר **ו**אין משתמשים.
 - לוגיקה: `src/lib/setup.ts` (server-only) + `src/app/actions/setup.ts`.
@@ -63,4 +74,4 @@
 1. ✅ תשתית, סכמה, נתוני דוגמה, אימות והרשאות, מבנה ממשק לכל תפקיד
 2. ✅ איתור מהיר (עובד/יחידה/ציוד/סידורי), ניהול מלאי, ייצוא Excel, ניהול משתמשים ויחידות, שינוי סיסמה
 3. ✅ זרימת בקשות, הקצאה, חתימה דיגיטלית, קבלות (מייל + Webhook SMS)
-4. זימוני החזרה, פעולות מרוכזות למנהל יחידה, תשתית סריקת ברקוד
+4. ✅ זימוני החזרה וקליטה עם טופס זיכוי, פעולות מרוכזות למנהל יחידה (חלוקה + אישור עובד, איסוף), סריקת ברקוד

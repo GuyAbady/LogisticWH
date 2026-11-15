@@ -270,6 +270,8 @@ model ReturnSummons {
   createdBy     User             @relation("SummonsCreatedBy", fields: [createdById], references: [id])
   createdAt     DateTime         @default(now())
   closedAt      DateTime?
+  // טופס הזיכוי החתום שסגר את הזימון
+  returnSignatureId String?
 
   @@index([userId, status])
 }
