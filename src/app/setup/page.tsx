@@ -18,7 +18,7 @@ export default async function SetupPage() {
           <div className="rounded-2xl bg-brand-600 p-3 text-white"><Warehouse className="size-8" /></div>
           <h1 className="text-2xl font-bold">הקמה ראשונית – LogisticWH</h1>
           <p className="text-sm text-slate-600">
-            יצירת מנהל המרלו&quot;ג הראשון. הדף ייסגר אוטומטית לאחר היצירה.
+            יצירת מנהל המערכת הראשון (כולל כל יכולות המרלו&quot;ג). הדף ייסגר אוטומטית לאחר היצירה.
           </p>
         </div>
         <div className="card"><SetupForm /></div>

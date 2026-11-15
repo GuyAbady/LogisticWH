@@ -17,6 +17,7 @@ npm run dev                 # http://localhost:3000
 
 | תפקיד | דוא"ל |
 |---|---|
+| מנהל מערכת | admin@demo.local |
 | מנהל מרלו"ג | warehouse@demo.local |
 | מנהל יחידה (מערכות מידע) | it.manager@demo.local |
 | מנהל יחידה (תפעול) | ops.manager@demo.local |
