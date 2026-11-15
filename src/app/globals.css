@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* פונט: Arial (לפי דרישת המשתמש) – פונט מערכת, ללא טעינה חיצונית */
+@theme {
+  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-600: #1d4ed8;
+  --color-brand-700: #1e40af;
+  --color-brand-900: #172554;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  font-family: var(--font-sans);
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* שדות מספר/דוא"ל/טלפון נשארים LTR גם בממשק RTL */
+input[type="email"],
+input[type="tel"],
+.ltr {
+  direction: ltr;
+  text-align: right;
+}
+
+/* רכיבי עיצוב משותפים (Tailwind v4: @utility מאפשר @apply ביניהם) */
+@utility card {
+  @apply rounded-xl border border-slate-200 bg-white p-4 shadow-sm;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-brand-600 text-white hover:bg-brand-700;
+}
+@utility btn-secondary {
+  @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50;
+}
+@utility input {
+  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100;
+}
+@utility label {
+  @apply mb-1 block text-sm font-bold text-slate-700;
+}
+@utility badge {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold;
+}

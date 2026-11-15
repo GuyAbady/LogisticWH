@@ -1,0 +1,289 @@
+// LogisticWH – סכמת בסיס נתונים
+// PostgreSQL (בייצור: Neon דרך Vercel Marketplace)
+//
+// עקרונות מרכזיים (שינויים מול התוכנית המקורית):
+// 1. Transaction – יומן תנועות שאינו נמחק/נערך (Append-only) לכל שינוי מלאי ושיוך.
+//    מאפשר איתור היסטורי מלא ("מי החזיק פריט X ומתי").
+// 2. Signature – טבלת חתימות נפרדת עם Hash של המסמך, IP, User-Agent וזמן,
+//    לחיזוק משקל ראייתי (חוק חתימה אלקטרונית, התשס"א-2001).
+// 3. QuantityHolding – יתרה נוכחית של פריט כמותי לעובד (מחליף את BulkAssignment כלוג).
+// 4. ReturnSummons – מקושר ב-Foreign Keys (ולא מחרוזות) ותומך גם בפריטים כמותיים.
+// 5. Enums אמיתיים במקום מחרוזות חופשיות.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────────── Enums ─────────────
+
+enum Role {
+  EMPLOYEE
+  UNIT_MANAGER
+  WAREHOUSE_MANAGER
+}
+
+enum SerialStatus {
+  IN_STOCK // במחסן
+  ALLOCATED // הוקצה לבקשה, ממתין לאיסוף וחתימה
+  PENDING_ACK // נחתם ע"י מנהל יחידה, ממתין לאישור העובד
+  SIGNED // חתום על עובד
+  PENDING_RETURN // זומן להחזרה
+  IN_REPAIR // בתיקון
+  WRITTEN_OFF // הושבת / נגרע
+}
+
+enum RequestStatus {
+  PENDING_MANAGER // ממתין למנהל יחידה
+  REJECTED_MANAGER // נדחה ע"י מנהל יחידה
+  PENDING_WAREHOUSE // אושר, ממתין למרלו"ג
+  REJECTED_WAREHOUSE // נדחה ע"י המרלו"ג
+  ALLOCATED // הוקצה, נקבע מועד איסוף
+  FULFILLED // נחתם ונמסר
+  CANCELLED // בוטל
+}
+
+enum SummonsStatus {
+  PENDING_RETURN
+  RETURNED_CREDITED
+  CANCELLED
+}
+
+enum TransactionType {
+  STOCK_IN // קליטת מלאי
+  ALLOCATE // הקצאה לבקשה
+  ISSUE // מסירה + חתימה לעובד
+  RETURN // החזרה + זיכוי
+  TRANSFER // העברה בין עובדים
+  ADJUST // תיקון מלאי ידני
+  REPAIR_OUT // יציאה לתיקון
+  REPAIR_IN // חזרה מתיקון
+  WRITE_OFF // גריעה
+}
+
+enum SignatureKind {
+  RECEIPT // חתימת עובד על קבלת ציוד
+  RETURN // אישור החזרה
+  MANAGER_BULK // חתימה מרוכזת של מנהל יחידה
+  EMPLOYEE_ACK // אישור עובד לחתימה מרוכזת
+}
+
+// ───────────── Models ─────────────
+
+model Unit {
+  id        String             @id @default(uuid())
+  name      String             @unique
+  code      String             @unique
+  createdAt DateTime           @default(now())
+  users     User[]
+  requests  EquipmentRequest[]
+}
+
+model User {
+  id             String   @id @default(uuid())
+  employeeNumber String   @unique // מספר עובד
+  fullName       String
+  email          String   @unique
+  phone          String
+  role           Role     @default(EMPLOYEE)
+  passwordHash   String
+  isActive       Boolean  @default(true)
+  unitId         String
+  unit           Unit     @relation(fields: [unitId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  serialItems        InventorySerial[]   @relation("SerialHolder")
+  quantityHoldings   QuantityHolding[]
+  requests           EquipmentRequest[]  @relation("Requester")
+  managedRequests    EquipmentRequest[]  @relation("ManagerDecision")
+  signatures         Signature[]
+  txFrom             Transaction[]       @relation("TxFrom")
+  txTo               Transaction[]       @relation("TxTo")
+  txPerformed        Transaction[]       @relation("TxPerformedBy")
+  summons            ReturnSummons[]     @relation("SummonedUser")
+  summonsCreated     ReturnSummons[]     @relation("SummonsCreatedBy")
+  auditLogs          AuditLog[]
+
+  @@index([unitId])
+}
+
+model CatalogItem {
+  id             String   @id @default(uuid())
+  sku            String   @unique // מק"ט
+  name           String
+  category       String
+  description    String?
+  requiresSerial Boolean  @default(false)
+  // סה"כ במלאי הארגון (מחסן + משויך) ויתרה זמינה במחסן.
+  // מתעדכנים אך ורק בתוך טרנזקציה יחד עם רשומת Transaction.
+  totalQuantity  Int      @default(0)
+  availableQty   Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  serials      InventorySerial[]
+  holdings     QuantityHolding[]
+  requests     EquipmentRequest[]
+  transactions Transaction[]
+  summons      ReturnSummons[]
+
+  @@index([category])
+}
+
+model InventorySerial {
+  id                 String            @id @default(uuid())
+  serialNumber       String            @unique
+  status             SerialStatus      @default(IN_STOCK)
+  catalogItemId      String
+  catalogItem        CatalogItem       @relation(fields: [catalogItemId], references: [id])
+  holderId           String?
+  holder             User?             @relation("SerialHolder", fields: [holderId], references: [id])
+  allocatedRequestId String?
+  allocatedRequest   EquipmentRequest? @relation(fields: [allocatedRequestId], references: [id])
+  notes              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  transactions Transaction[]
+  summons      ReturnSummons[]
+
+  @@index([catalogItemId, status])
+  @@index([holderId])
+}
+
+// יתרה נוכחית של פריט כמותי אצל עובד
+model QuantityHolding {
+  id            String      @id @default(uuid())
+  catalogItemId String
+  catalogItem   CatalogItem @relation(fields: [catalogItemId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  quantity      Int         @default(0)
+  // כמות שנחתמה ע"י מנהל יחידה וממתינה לאישור העובד
+  pendingAckQty Int         @default(0)
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([catalogItemId, userId])
+  @@index([userId])
+}
+
+model EquipmentRequest {
+  id                String        @id @default(uuid())
+  requesterId       String
+  requester         User          @relation("Requester", fields: [requesterId], references: [id])
+  unitId            String
+  unit              Unit          @relation(fields: [unitId], references: [id])
+  catalogItemId     String
+  catalogItem       CatalogItem   @relation(fields: [catalogItemId], references: [id])
+  quantity          Int           @default(1)
+  status            RequestStatus @default(PENDING_MANAGER)
+  justification     String?
+  managerId         String?
+  manager           User?         @relation("ManagerDecision", fields: [managerId], references: [id])
+  managerNote       String?
+  managerDecidedAt  DateTime?
+  warehouseNote     String?
+  pickupDate        DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  allocatedSerials InventorySerial[]
+  transactions     Transaction[]
+
+  @@index([unitId, status])
+  @@index([requesterId])
+}
+
+model Signature {
+  id           String        @id @default(uuid())
+  kind         SignatureKind
+  signerId     String
+  signer       User          @relation(fields: [signerId], references: [id])
+  // תמונת החתימה כ-PNG Base64. (חלופה עתידית: Vercel Blob + שמירת URL בלבד)
+  imageData    String
+  // SHA-256 של תוכן המסמך שנחתם (רשימת פריטים, כמויות, זמן) – מונע שינוי בדיעבד
+  documentHash String
+  documentJson String // תוכן המסמך שנחתם (JSON) לצורך הפקת קבלה חוזרת
+  ipAddress    String?
+  userAgent    String?
+  signedAt     DateTime      @default(now())
+
+  transactions Transaction[] @relation("TxSignature")
+  ackFor       Transaction[] @relation("TxAckSignature")
+
+  @@index([signerId])
+}
+
+// יומן תנועות – Append-only. אין לעדכן/למחוק רשומות (למעט שדות אישור העובד).
+model Transaction {
+  id             String           @id @default(uuid())
+  type           TransactionType
+  catalogItemId  String
+  catalogItem    CatalogItem      @relation(fields: [catalogItemId], references: [id])
+  serialId       String?
+  serial         InventorySerial? @relation(fields: [serialId], references: [id])
+  quantity       Int              @default(1)
+  fromUserId     String? // null = מהמחסן
+  fromUser       User?            @relation("TxFrom", fields: [fromUserId], references: [id])
+  toUserId       String? // null = אל המחסן
+  toUser         User?            @relation("TxTo", fields: [toUserId], references: [id])
+  performedById  String
+  performedBy    User             @relation("TxPerformedBy", fields: [performedById], references: [id])
+  signatureId    String?
+  signature      Signature?       @relation("TxSignature", fields: [signatureId], references: [id])
+  requestId      String?
+  request        EquipmentRequest? @relation(fields: [requestId], references: [id])
+  // חתימה מרוכזת של מנהל: האחריות עוברת לעובד רק לאחר אישורו
+  requiresAck    Boolean          @default(false)
+  ackAt          DateTime?
+  ackSignatureId String?
+  ackSignature   Signature?       @relation("TxAckSignature", fields: [ackSignatureId], references: [id])
+  note           String?
+  createdAt      DateTime         @default(now())
+
+  @@index([catalogItemId, createdAt])
+  @@index([serialId])
+  @@index([toUserId])
+  @@index([fromUserId])
+}
+
+model ReturnSummons {
+  id            String           @id @default(uuid())
+  userId        String
+  user          User             @relation("SummonedUser", fields: [userId], references: [id])
+  catalogItemId String
+  catalogItem   CatalogItem      @relation(fields: [catalogItemId], references: [id])
+  serialId      String? // לפריט סידורי
+  serial        InventorySerial? @relation(fields: [serialId], references: [id])
+  quantity      Int              @default(1) // לפריט כמותי
+  reason        String
+  dueDate       DateTime?
+  status        SummonsStatus    @default(PENDING_RETURN)
+  createdById   String
+  createdBy     User             @relation("SummonsCreatedBy", fields: [createdById], references: [id])
+  createdAt     DateTime         @default(now())
+  closedAt      DateTime?
+
+  @@index([userId, status])
+}
+
+// יומן פעולות מערכת (כניסות, פעולות רגישות) – לעמידה בתקנות הגנת הפרטיות (אבטחת מידע)
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String?
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
