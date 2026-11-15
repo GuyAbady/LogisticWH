@@ -1,3 +1,4 @@
+import { ClipboardList } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole } from "@/lib/dal";
@@ -27,7 +28,7 @@ export default async function MyRequestsPage() {
 
   return (
     <>
-      <PageHeader title="הבקשות שלי" subtitle={user.role === "UNIT_MANAGER" ? 'כמנהל יחידה, בקשותיך עוברות ישירות למרלו"ג' : "בקשה חדשה עוברת לאישור מנהל היחידה ואז למרלו\"ג"} />
+      <PageHeader icon={<ClipboardList className="size-5" />} title="הבקשות שלי" subtitle={user.role === "UNIT_MANAGER" ? 'כמנהל יחידה, בקשותיך עוברות ישירות למרלו"ג' : "בקשה חדשה עוברת לאישור מנהל היחידה ואז למרלו\"ג"} />
       <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
         <section className="card h-fit">
           <h2 className="mb-3 font-bold">בקשת ציוד חדשה</h2>

@@ -1,3 +1,4 @@
+import { PackagePlus } from "lucide-react";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { createCatalogItem } from "@/app/actions/inventory";
@@ -11,7 +12,7 @@ export default async function NewItemPage() {
   const categories = await db.catalogItem.findMany({ distinct: ["category"], select: { category: true } });
   return (
     <>
-      <PageHeader title="פריט קטלוג חדש" subtitle="לאחר היצירה ניתן לקלוט מלאי בכרטיס הפריט" />
+      <PageHeader icon={<PackagePlus className="size-5" />} title="פריט קטלוג חדש" subtitle="לאחר היצירה ניתן לקלוט מלאי בכרטיס הפריט" />
       <div className="card max-w-xl">
         <ActionForm action={createCatalogItem} submitLabel="צור פריט">
           <div>

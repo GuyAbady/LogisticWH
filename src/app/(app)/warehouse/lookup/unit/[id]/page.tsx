@@ -1,3 +1,4 @@
+import { Building2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/dal";
@@ -29,7 +30,7 @@ export default async function UnitFolder({ params }: { params: Promise<{ id: str
 
   return (
     <>
-      <PageHeader title={`ציוד יחידה – ${unit.name}`} subtitle={`קוד ${unit.code}`} actions={<ExportButton report="unit" id={unit.id} />} />
+      <PageHeader icon={<Building2 className="size-5" />} title={`ציוד יחידה – ${unit.name}`} subtitle={`קוד ${unit.code}`} actions={<ExportButton report="unit" id={unit.id} />} />
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
         <StatCard label="עובדים" value={unit.users.length} />
         <StatCard label="פריטים סידוריים" value={rows.filter((r) => r.kind === "SERIAL").length} />

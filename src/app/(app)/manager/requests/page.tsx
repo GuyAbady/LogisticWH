@@ -1,3 +1,4 @@
+import { ClipboardCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
@@ -23,7 +24,7 @@ export default async function ManagerRequestsPage() {
 
   return (
     <>
-      <PageHeader title={`אישור בקשות – ${user.unit.name}`} subtitle={`${pending.length} בקשות ממתינות להחלטתך`} />
+      <PageHeader icon={<ClipboardCheck className="size-5" />} title={`אישור בקשות – ${user.unit.name}`} subtitle={`${pending.length} בקשות ממתינות להחלטתך`} />
       <section className="mb-8 space-y-3">
         {pending.length === 0 && <EmptyState text="אין בקשות ממתינות" />}
         {pending.map((r) => (

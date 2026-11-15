@@ -1,6 +1,7 @@
 import { Hash, Package } from "lucide-react";
 import type { getUserEquipment } from "@/lib/queries";
 import { EmptyState, SerialBadge, fmtDate } from "./ui";
+import ItemIcon from "./ItemIcon";
 
 type Equipment = Awaited<ReturnType<typeof getUserEquipment>>;
 
@@ -15,8 +16,9 @@ export default function EquipmentList({ data }: { data: Equipment }) {
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {serials.map((s) => (
               <li key={s.id} className="card">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-bold">{s.catalogItem.name}</p>
+                <div className="flex items-start gap-3">
+                  <ItemIcon name={s.catalogItem.name} category={s.catalogItem.category} />
+                  <p className="min-w-0 flex-1 font-bold leading-snug">{s.catalogItem.name}</p>
                   <SerialBadge status={s.status} />
                 </div>
                 <dl className="mt-2 grid grid-cols-2 gap-1 text-sm text-slate-600">
@@ -34,8 +36,9 @@ export default function EquipmentList({ data }: { data: Equipment }) {
           <h2 className="mb-2 flex items-center gap-2 font-bold"><Package className="size-4" /> פריטים כמותיים ({holdings.length})</h2>
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {holdings.map((h) => (
-              <li key={h.id} className="card flex items-center justify-between gap-2">
-                <div>
+              <li key={h.id} className="card flex items-center gap-3">
+                <ItemIcon name={h.catalogItem.name} category={h.catalogItem.category} />
+                <div className="min-w-0 flex-1">
                   <p className="font-bold">{h.catalogItem.name}</p>
                   <p className="ltr text-right font-mono text-sm text-slate-600">{h.catalogItem.sku}</p>
                   {h.pendingAckQty > 0 && (

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, ShieldCheck, ShieldAlert } from "lucide-react";
+import { CheckCircle2, ShieldCheck, ShieldAlert, FileCheck2 } from "lucide-react";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { DOC_TITLES, verifyDocument, type GenericDoc, type ReceiptDoc } from "@/lib/receipt";
@@ -49,7 +49,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
           <CheckCircle2 className="size-5 shrink-0" aria-hidden /> {SUCCESS[parsed.type]}
         </p>
       )}
-      <PageHeader title={DOC_TITLES[parsed.type]} subtitle={`מספר מסמך ${sig.id.slice(0, 8).toUpperCase()}`} actions={<PrintButton />} />
+      <PageHeader icon={<FileCheck2 className="size-5" />} title={DOC_TITLES[parsed.type]} subtitle={`מספר מסמך ${sig.id.slice(0, 8).toUpperCase()}`} actions={<PrintButton />} />
 
       <article className="card mx-auto max-w-2xl space-y-5 print:border-0 print:p-0">
         <dl className="grid gap-3 text-sm sm:grid-cols-2">
