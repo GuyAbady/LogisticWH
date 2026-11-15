@@ -59,6 +59,15 @@ export async function createUser(_prev: ActionResult, fd: FormData): Promise<Act
     const admins = await db.user.count({ where: { role: "ADMIN" } });
     if (admins > 0) return { error: "רק מנהל מערכת יכול ליצור מנהל מערכת" };
   }
+  // כפילות: הודעה ברורה שמפנה לעריכה (במקום שגיאת "ערך כפול" כללית)
+  const existing = await db.user.findFirst({
+    where: { OR: [{ employeeNumber: data.employeeNumber }, { email: data.email }] },
+    select: { fullName: true, employeeNumber: true, email: true },
+  });
+  if (existing) {
+    const what = existing.employeeNumber === data.employeeNumber ? `מספר עובד ${data.employeeNumber}` : `דוא"ל ${data.email}`;
+    return { error: `כבר קיים משתמש עם ${what} (${existing.fullName}). כדי לשנות את פרטיו או את תפקידו – פתחו "עריכה" בכרטיס שלו ברשימת המשתמשים, או "עריכת החשבון שלי" בראש הדף.` };
+  }
   try {
     const u = await db.user.create({ data: { ...data, passwordHash: await bcrypt.hash(password, 12) } });
     await audit({ userId: admin.id, action: "USER_CREATE", entity: "User", entityId: u.id, details: data.role });
