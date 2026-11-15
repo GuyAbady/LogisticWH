@@ -8,6 +8,7 @@ import type { SerialStatus, TransactionType } from "@/generated/prisma/enums";
 export const TX_LABELS: Record<TransactionType, string> = {
   STOCK_IN: "קליטת מלאי",
   ALLOCATE: "הקצאה",
+  DEALLOCATE: "שחרור הקצאה",
   ISSUE: "מסירה וחתימה",
   RETURN: "החזרה וזיכוי",
   TRANSFER: "העברה",

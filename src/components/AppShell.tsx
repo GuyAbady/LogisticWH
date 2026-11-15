@@ -27,7 +27,7 @@ export default function AppShell({ user, children }: { user: CurrentUser; childr
   return (
     <div className="min-h-dvh md:flex">
       {/* סרגל צד – מחשב */}
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-l border-slate-200 bg-white px-3 py-5 md:flex">
+      <aside className="sticky top-0 hidden print:hidden h-dvh w-64 shrink-0 flex-col border-l border-slate-200 bg-white px-3 py-5 md:flex">
         <div className="mb-6 px-2"><Logo /></div>
         <SideNav items={items} />
         <div className="mt-auto border-t border-slate-200 px-2 pt-4">
@@ -51,7 +51,7 @@ export default function AppShell({ user, children }: { user: CurrentUser; childr
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* כותרת עליונה – נייד */}
-        <header className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 py-2 md:hidden">
+        <header className="sticky top-0 z-10 flex print:hidden items-center justify-between gap-2 border-b border-slate-200 bg-white px-3 py-2 md:hidden">
           <div className="flex min-w-0 items-center gap-2">
             <Logo small />
             <div className="min-w-0">
@@ -67,7 +67,7 @@ export default function AppShell({ user, children }: { user: CurrentUser; childr
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-5 pb-28 md:px-8 md:pt-8 md:pb-10">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-5 pb-28 md:px-8 md:pt-8 md:pb-10 print:p-0">{children}</main>
       </div>
 
       <BottomNav items={items} />

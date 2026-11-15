@@ -41,6 +41,15 @@
 - טפסים: `src/components/ActionForm.tsx` – שליחה דרך startTransition כדי ש-React 19 לא ימחק שדות בשגיאת אימות.
 - `uuid` מקובע ל-11.1.1 דרך `overrides` (GHSA-w5hq-g745-h8pq, תלות של exceljs).
 
+## מוסכמות קוד (שלב 3)
+- זרימת בקשות: `src/lib/requests.ts`. כל מעבר סטטוס מותנה (`updateMany where status`) – מונע מרוץ.
+- הקצאה כמותית מפחיתה `availableQty` (שריון); החתימה רק רושמת אצל העובד. סידוריים: IN_STOCK→ALLOCATED→SIGNED.
+- שחרור הקצאה נרשם כ-`DEALLOCATE`.
+- חתימה: `signature_pad` 5 (לא react-signature-canvas – alpha, תלוי ב-signature_pad 2.x). רכיב: `SignatureField`.
+- קבלה: `src/lib/receipt.ts` – JSON קנוני + SHA-256; דף `/receipts/[id]` מאמת שלמות. גישה: החותם / מרלו"ג / מנהל יחידת החותם.
+- התראות: `src/lib/notify.ts` – SMTP (Nodemailer) ו-Webhook SMS עם HMAC; אופציונליים, כשל לא מבטל פעולה. תוכן מה-DB עובר escapeHtml.
+- זמן: `src/lib/time.ts` – datetime-local מתפרש כשעון ישראל (שרתי Vercel ב-UTC).
+
 ## הקמה ראשונית
 - `/setup` – יצירת מנהל מרלו"ג ראשון. פעיל רק אם `SETUP_TOKEN` (16+ תווים) מוגדר **ו**אין משתמשים.
 - לוגיקה: `src/lib/setup.ts` (server-only) + `src/app/actions/setup.ts`.
@@ -53,5 +62,5 @@
 ## שלבי פיתוח
 1. ✅ תשתית, סכמה, נתוני דוגמה, אימות והרשאות, מבנה ממשק לכל תפקיד
 2. ✅ איתור מהיר (עובד/יחידה/ציוד/סידורי), ניהול מלאי, ייצוא Excel, ניהול משתמשים ויחידות, שינוי סיסמה
-3. זרימת בקשות, הקצאה, חתימה דיגיטלית, קבלות (מייל + Webhook SMS)
+3. ✅ זרימת בקשות, הקצאה, חתימה דיגיטלית, קבלות (מייל + Webhook SMS)
 4. זימוני החזרה, פעולות מרוכזות למנהל יחידה, תשתית סריקת ברקוד
