@@ -13,6 +13,8 @@ export const metadata: Metadata = { title: "משתמשים ויחידות" };
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ unit?: string }> }) {
   const me = await requireRole("WAREHOUSE_MANAGER");
   const { unit } = await searchParams;
+  // תפקיד מנהל מערכת מוצג רק למנהל מערכת, או כשאין עדיין אף מנהל מערכת (אתחול)
+  const canGrantAdmin = me.role === "ADMIN" || (await db.user.count({ where: { role: "ADMIN" } })) === 0;
   const units = await db.unit.findMany({ orderBy: { name: "asc" }, include: { _count: { select: { users: true } } } });
   const unitFilter = units.find((u) => u.id === unit)?.id;
   const users = await db.user.findMany({
@@ -24,6 +26,9 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader icon={<Users className="size-5" />} title="משתמשים ויחידות" subtitle="הוספת עובדים, מנהלי יחידות ויחידות ארגוניות" />
+      {me.role === "ADMIN" && (
+        <p className="mb-4 text-sm"><Link className="link" href="/admin/import">טעינת רשימת עובדים מקובץ Excel ←</Link></p>
+      )}
 
       <div className="mb-6 grid gap-6 lg:grid-cols-[1fr_20rem]">
         <section className="card">
@@ -36,7 +41,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
             <div>
               <label className="label" htmlFor="role">תפקיד</label>
               <select id="role" name="role" className="input" defaultValue="EMPLOYEE">
-                {Object.entries(ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                {Object.entries(ROLE_LABELS).filter(([k]) => k !== "ADMIN" || canGrantAdmin).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
             <div>

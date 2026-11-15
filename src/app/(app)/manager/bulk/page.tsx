@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Info, Layers } from "lucide-react";
-import { requireRole } from "@/lib/dal";
+import { actingUnit, requireRole } from "@/lib/dal";
+import UnitSwitcher from "@/components/UnitSwitcher";
 import { db } from "@/lib/db";
 import { getAssignments } from "@/lib/reports";
 import { bulkCollectAction, bulkTransferAction } from "@/app/actions/bulk";
@@ -11,13 +12,16 @@ import SignatureField from "@/components/SignatureField";
 
 export const metadata: Metadata = { title: "פעולות מרוכזות" };
 
-export default async function BulkPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function BulkPage({ searchParams }: { searchParams: Promise<{ tab?: string; unit?: string }> }) {
   const me = await requireRole("UNIT_MANAGER");
-  const tab = (await searchParams).tab === "collect" ? "collect" : "distribute";
+  const sp = await searchParams;
+  const tab = sp.tab === "collect" ? "collect" : "distribute";
+  const unit = await actingUnit(me, sp.unit);
+  const uq = me.role === "ADMIN" ? `unit=${unit.id}` : "";
 
   // עובדי היחידה בלבד (סינון בשרת), ללא המנהל עצמו
   const employees = await db.user.findMany({
-    where: { unitId: me.unitId, isActive: true, NOT: { id: me.id } },
+    where: { unitId: unit.id, isActive: true, NOT: { id: me.id } },
     orderBy: { fullName: "asc" },
     select: { id: true, fullName: true, employeeNumber: true },
   });
@@ -25,7 +29,7 @@ export default async function BulkPage({ searchParams }: { searchParams: Promise
   const [mySerials, myHoldings, unitRows, awaitingAck] = await Promise.all([
     db.inventorySerial.findMany({ where: { holderId: me.id, status: "SIGNED" }, include: { catalogItem: true }, orderBy: { serialNumber: "asc" } }),
     db.quantityHolding.findMany({ where: { userId: me.id, quantity: { gt: 0 } }, include: { catalogItem: true } }),
-    tab === "collect" ? getAssignments({ unitId: me.unitId }) : Promise.resolve([]),
+    tab === "collect" ? getAssignments({ unitId: unit.id }) : Promise.resolve([]),
     db.transaction.findMany({
       where: { fromUserId: me.id, type: "TRANSFER", requiresAck: true, ackAt: null },
       orderBy: { createdAt: "desc" },
@@ -40,11 +44,12 @@ export default async function BulkPage({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <PageHeader icon={<Layers className="size-5" />} title="פעולות מרוכזות" subtitle={`${me.unit.name} · ${employees.length} עובדים`} />
+      <PageHeader icon={<Layers className="size-5" />} title="פעולות מרוכזות" subtitle={`${unit.name} · ${employees.length} עובדים`} />
+      {me.role === "ADMIN" && <UnitSwitcher current={unit.id} action="/manager/bulk" />}
 
       <nav className="mb-5 flex gap-2" aria-label="סוג פעולה">
-        <Link href="/manager/bulk" className={tabCls("distribute")} aria-current={tab === "distribute" ? "page" : undefined}>החתמה מרוכזת (חלוקה)</Link>
-        <Link href="/manager/bulk?tab=collect" className={tabCls("collect")} aria-current={tab === "collect" ? "page" : undefined}>זיכוי מרוכז (איסוף)</Link>
+        <Link href={`/manager/bulk${uq ? `?${uq}` : ""}`} className={tabCls("distribute")} aria-current={tab === "distribute" ? "page" : undefined}>החתמה מרוכזת (חלוקה)</Link>
+        <Link href={`/manager/bulk?tab=collect${uq ? `&${uq}` : ""}`} className={tabCls("collect")} aria-current={tab === "collect" ? "page" : undefined}>זיכוי מרוכז (איסוף)</Link>
       </nav>
 
       {tab === "distribute" ? (
@@ -57,6 +62,7 @@ export default async function BulkPage({ searchParams }: { searchParams: Promise
             <EmptyState text='אין ציוד רשום עליך לחלוקה. ניתן לבקש ציוד מהמרלו"ג במסך "הבקשות שלי".' />
           ) : (
             <ActionForm action={bulkTransferAction} submitLabel="חתימה וחלוקה" pendingLabel="מחלק..." buttonClassName="btn-accent w-full sm:w-auto">
+              <input type="hidden" name="unitId" value={unit.id} />
               {mySerials.length > 0 && (
                 <section className="card">
                   <h2 className="mb-2 font-bold">פריטים סידוריים</h2>
@@ -114,6 +120,7 @@ export default async function BulkPage({ searchParams }: { searchParams: Promise
           {collectable.length === 0 ? <EmptyState text="אין ציוד חתום על עובדי היחידה" /> : (
             <ActionForm action={bulkCollectAction} submitLabel="חתימה וזיכוי העובדים" pendingLabel="מזכה..." buttonClassName="btn-accent w-full sm:w-auto"
               confirmText="לאסוף את הפריטים המסומנים ולזכות את העובדים?">
+              <input type="hidden" name="unitId" value={unit.id} />
               <section className="card overflow-x-auto">
                 <table className="table-base min-w-[560px]">
                   <thead><tr><th>איסוף</th><th>עובד</th><th>פריט</th><th>מספר סידורי / כמות</th></tr></thead>

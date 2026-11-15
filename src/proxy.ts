@@ -4,7 +4,7 @@ import { ROLE_HOME, canAccessPath } from "@/lib/roles";
 
 // בדיקה "אופטימית" בלבד (קריאת העוגייה, ללא DB). הבדיקה המחייבת נעשית ב-DAL.
 // מקור: Next.js Authentication guide – "Optimistic checks with Proxy".
-const PROTECTED = ["/employee", "/manager", "/warehouse"];
+const PROTECTED = ["/employee", "/manager", "/warehouse", "/admin"];
 
 export default async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;

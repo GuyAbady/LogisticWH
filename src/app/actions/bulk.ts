@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { requireRole } from "@/lib/dal";
+import { managerActor, requireRole } from "@/lib/dal";
 import { audit, getClientIp } from "@/lib/audit";
 import { errorMessage, type ActionResult } from "@/lib/action-result";
 import { validateSignatureImage } from "@/lib/receipt";
@@ -21,7 +21,8 @@ async function sigMeta(fd: FormData) {
 
 /** חלוקה: ts:<serialId>=<employeeId>, tq:<itemId>:<employeeId>=<qty> */
 export async function bulkTransferAction(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
-  const user = await requireRole("UNIT_MANAGER");
+  // מנהל יחידה – תמיד היחידה שלו; מנהל מערכת – היחידה שנבחרה בטופס
+  const user = await managerActor(await requireRole("UNIT_MANAGER"), fd.get("unitId") as string | null);
   const s = await sigMeta(fd);
   if (s.invalid) return { error: s.invalid };
   const lines: BulkLine[] = [];
@@ -54,7 +55,7 @@ export async function bulkTransferAction(_prev: ActionResult, fd: FormData): Pro
 
 /** זיכוי מרוכז: cs=<serialId>|<employeeId> (תיבות), cq:<itemId>:<employeeId>=<qty> */
 export async function bulkCollectAction(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
-  const user = await requireRole("UNIT_MANAGER");
+  const user = await managerActor(await requireRole("UNIT_MANAGER"), fd.get("unitId") as string | null);
   const s = await sigMeta(fd);
   if (s.invalid) return { error: s.invalid };
   const lines: BulkLine[] = [];

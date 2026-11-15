@@ -25,6 +25,7 @@ enum Role {
   EMPLOYEE
   UNIT_MANAGER
   WAREHOUSE_MANAGER
+  ADMIN // מנהל מערכת: כל יכולות המחסנאי ומנהל היחידה + ניהול משתמשים, טעינה מאקסל וקטגוריות
 }
 
 enum SerialStatus {
@@ -113,11 +114,22 @@ model User {
   @@index([unitId])
 }
 
+// קטגוריות פריטים מנוהלות. CatalogItem.category מפנה לשם הקטגוריה (FK על name),
+// כך ששינוי שם מתעדכן אוטומטית בכל הפריטים (ON UPDATE CASCADE), ומחיקה נחסמת כשיש פריטים.
+model Category {
+  id        String        @id @default(uuid())
+  name      String        @unique
+  icon      String? // מפתח אייקון (ראו ItemIcon)
+  createdAt DateTime      @default(now())
+  items     CatalogItem[]
+}
+
 model CatalogItem {
   id             String   @id @default(uuid())
   sku            String   @unique // מק"ט
   name           String
   category       String
+  categoryRef    Category @relation(fields: [category], references: [name], onUpdate: Cascade, onDelete: Restrict)
   description    String?
   requiresSerial Boolean  @default(false)
   // סה"כ במלאי הארגון (מחסן + משויך) ויתרה זמינה במחסן.

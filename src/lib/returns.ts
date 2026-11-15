@@ -19,7 +19,7 @@ export class ReturnError extends Error {
 type Tx = Prisma.TransactionClient;
 type Actor = { id: string; role: Role; unitId: string; fullName: string };
 
-const ROLE_HE: Record<Role, string> = { EMPLOYEE: "עובד", UNIT_MANAGER: "מנהל יחידה", WAREHOUSE_MANAGER: 'מנהל מרלו"ג' };
+const ROLE_HE: Record<Role, string> = { EMPLOYEE: "עובד", UNIT_MANAGER: "מנהל יחידה", WAREHOUSE_MANAGER: 'מנהל מרלו"ג', ADMIN: "מנהל מערכת" };
 
 /** יצירת רשומת חתימה למסמך כללי (משותף לזיכוי ולפעולות מרוכזות) */
 export async function createSignedDoc(

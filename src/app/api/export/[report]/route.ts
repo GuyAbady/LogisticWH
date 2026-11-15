@@ -60,7 +60,7 @@ async function historyRows(filter: Parameters<typeof getHistory>[0], take = 5000
 export async function GET(req: NextRequest, ctx: { params: Promise<{ report: string }> }) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "נדרשת התחברות" }, { status: 401 });
-  if (user.role !== "WAREHOUSE_MANAGER") return NextResponse.json({ error: "אין הרשאה" }, { status: 403 });
+  if (user.role !== "WAREHOUSE_MANAGER" && user.role !== "ADMIN") return NextResponse.json({ error: "אין הרשאה" }, { status: 403 });
 
   const { report } = await ctx.params;
   if (!REPORTS.includes(report as Report)) return NextResponse.json({ error: "דוח לא קיים" }, { status: 404 });

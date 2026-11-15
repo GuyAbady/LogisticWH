@@ -160,3 +160,18 @@ input[type="tel"],
     }
   }
 }
+
+/* מגירת ניווט בנייד: כניסה מהצד הימני (RTL), 220ms – פעולה מזדמנת, נכנסת עם ease-out מותאם */
+@utility drawer-enter {
+  transition: transform 220ms var(--ease-out);
+  @starting-style {
+    transform: translateX(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drawer-enter {
+    @starting-style {
+      transform: none;
+    }
+  }
+}

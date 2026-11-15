@@ -14,6 +14,13 @@ const UnitSchema = z.object({
   code: z.string().trim().min(1, "יש להזין קוד").max(20).regex(/^[A-Za-z0-9_-]+$/, "קוד: אותיות באנגלית, ספרות, - או _"),
 });
 
+/** מנהל מרלו"ג אינו רשאי לשנות משתמש ADMIN (השבתה/איפוס סיסמה) */
+async function isAdminTargetForbidden(actorRole: string, targetId: string) {
+  if (actorRole === "ADMIN") return false;
+  const t = await db.user.findUnique({ where: { id: targetId }, select: { role: true } });
+  return t?.role === "ADMIN";
+}
+
 export async function createUnit(_prev: ActionResult, fd: FormData): Promise<ActionResult> {
   const user = await requireRole("WAREHOUSE_MANAGER");
   const parsed = UnitSchema.safeParse({ name: fd.get("name"), code: fd.get("code") });
@@ -33,7 +40,7 @@ const UserSchema = z.object({
   employeeNumber: z.string().trim().min(1, "יש להזין מספר עובד").max(20),
   email: z.string().trim().toLowerCase().email('כתובת דוא"ל לא תקינה'),
   phone: z.string().trim().regex(/^[0-9+\-\s]{9,15}$/, "מספר טלפון לא תקין"),
-  role: z.enum(["EMPLOYEE", "UNIT_MANAGER", "WAREHOUSE_MANAGER"]),
+  role: z.enum(["EMPLOYEE", "UNIT_MANAGER", "WAREHOUSE_MANAGER", "ADMIN"]),
   unitId: z.string().uuid("יש לבחור יחידה"),
   password: PasswordSchema,
 });
@@ -45,6 +52,12 @@ export async function createUser(_prev: ActionResult, fd: FormData): Promise<Act
   ));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const { password, ...data } = parsed.data;
+  // מניעת הסלמת הרשאות: רק מנהל מערכת מעניק תפקיד ADMIN.
+  // חריג אתחול: כשאין אף מנהל מערכת, מנהל מרלו"ג רשאי ליצור את הראשון (נרשם ביומן).
+  if (data.role === "ADMIN" && admin.role !== "ADMIN") {
+    const admins = await db.user.count({ where: { role: "ADMIN" } });
+    if (admins > 0) return { error: "רק מנהל מערכת יכול ליצור מנהל מערכת" };
+  }
   try {
     const u = await db.user.create({ data: { ...data, passwordHash: await bcrypt.hash(password, 12) } });
     await audit({ userId: admin.id, action: "USER_CREATE", entity: "User", entityId: u.id, details: data.role });
@@ -60,6 +73,7 @@ export async function setUserActive(_prev: ActionResult, fd: FormData): Promise<
   const userId = String(fd.get("userId") ?? "");
   const active = fd.get("active") === "true";
   if (userId === admin.id) return { error: "לא ניתן להשבית את המשתמש שלך" };
+  if (await isAdminTargetForbidden(admin.role, userId)) return { error: "רק מנהל מערכת יכול לשנות מנהל מערכת" };
   if (!active) {
     // לא משביתים עובד שעדיין מחזיק ציוד – קודם יש לזכות
     const [serials, qty] = await Promise.all([
@@ -81,6 +95,7 @@ export async function resetUserPassword(_prev: ActionResult, fd: FormData): Prom
   const userId = String(fd.get("userId") ?? "");
   const parsed = PasswordSchema.safeParse(fd.get("password"));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (await isAdminTargetForbidden(admin.role, userId)) return { error: "רק מנהל מערכת יכול לשנות מנהל מערכת" };
   await db.user.update({ where: { id: userId }, data: { passwordHash: await bcrypt.hash(parsed.data, 12) } });
   await audit({ userId: admin.id, action: "USER_PASSWORD_RESET", entity: "User", entityId: userId });
   return { ok: "הסיסמה אופסה. מסור אותה לעובד בערוץ מאובטח." };

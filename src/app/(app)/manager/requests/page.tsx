@@ -1,6 +1,7 @@
 import { ClipboardCheck } from "lucide-react";
 import type { Metadata } from "next";
-import { requireRole } from "@/lib/dal";
+import { actingUnit, requireRole } from "@/lib/dal";
+import UnitSwitcher from "@/components/UnitSwitcher";
 import { db } from "@/lib/db";
 import { decideRequest } from "@/app/actions/requests";
 import { PageHeader, EmptyState } from "@/components/ui";
@@ -14,17 +15,19 @@ const include = {
   requester: { select: { fullName: true, employeeNumber: true } },
 } as const;
 
-export default async function ManagerRequestsPage() {
+export default async function ManagerRequestsPage({ searchParams }: { searchParams: Promise<{ unit?: string }> }) {
   const user = await requireRole("UNIT_MANAGER");
+  const unit = await actingUnit(user, (await searchParams).unit);
   // סינון לפי יחידת המנהל בשרת בלבד
   const [pending, recent] = await Promise.all([
-    db.equipmentRequest.findMany({ where: { unitId: user.unitId, status: "PENDING_MANAGER" }, orderBy: { createdAt: "asc" }, include }),
-    db.equipmentRequest.findMany({ where: { unitId: user.unitId, status: { not: "PENDING_MANAGER" } }, orderBy: { updatedAt: "desc" }, take: 20, include }),
+    db.equipmentRequest.findMany({ where: { unitId: unit.id, status: "PENDING_MANAGER" }, orderBy: { createdAt: "asc" }, include }),
+    db.equipmentRequest.findMany({ where: { unitId: unit.id, status: { not: "PENDING_MANAGER" } }, orderBy: { updatedAt: "desc" }, take: 20, include }),
   ]);
 
   return (
     <>
-      <PageHeader icon={<ClipboardCheck className="size-5" />} title={`אישור בקשות – ${user.unit.name}`} subtitle={`${pending.length} בקשות ממתינות להחלטתך`} />
+      <PageHeader icon={<ClipboardCheck className="size-5" />} title={`אישור בקשות – ${unit.name}`} subtitle={`${pending.length} בקשות ממתינות להחלטתך`} />
+      {user.role === "ADMIN" && <UnitSwitcher current={unit.id} action="/manager/requests" />}
       <section className="mb-8 space-y-3">
         {pending.length === 0 && <EmptyState text="אין בקשות ממתינות" />}
         {pending.map((r) => (
