@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Building2, Hash, Package, User } from "lucide-react";
+import { Building2, Hash, Package, User, Search } from "lucide-react";
 import { requireRole } from "@/lib/dal";
 import { globalSearch } from "@/lib/reports";
 import { ROLE_LABELS } from "@/lib/roles";
@@ -28,6 +28,7 @@ export default async function LookupPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <PageHeader
+        icon={<Search className="size-5" />}
         title="איתור מהיר"
         subtitle='חיפוש לפי שם עובד, מספר עובד, יחידה, מק"ט, שם פריט או מספר סידורי'
         actions={<div className="flex flex-wrap gap-2"><ExportButton report="assignments" label="כל השיוכים" /><ExportButton report="transactions" label="יומן תנועות" /></div>}

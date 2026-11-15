@@ -1,3 +1,4 @@
+import { PenLine } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole } from "@/lib/dal";
@@ -27,7 +28,7 @@ export default async function SignListPage() {
   ]);
   return (
     <>
-      <PageHeader title="ממתין לחתימתי" subtitle='הקצאות מהמרלו"ג (חתימה בעת האיסוף) וציוד שחולק לך ע"י מנהל היחידה' />
+      <PageHeader icon={<PenLine className="size-5" />} title="ממתין לחתימתי" subtitle='הקצאות מהמרלו"ג (חתימה בעת האיסוף) וציוד שחולק לך ע"י מנהל היחידה' />
       {transfers.length > 0 && (
         <section className="card mb-6">
           <h2 className="font-bold">ציוד שחולק לך ע&quot;י מנהל היחידה</h2>

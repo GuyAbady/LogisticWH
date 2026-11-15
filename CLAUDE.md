@@ -33,6 +33,11 @@
   הודעות משוב 200ms; לכבד `prefers-reduced-motion`. hover ב-Tailwind v4 פעיל רק במכשירים עם hover.
 - יעד מגע ≥ 44px (`min-h-11`), כפתורים קטנים בטבלאות `min-h-9`; פוקוס גלוי (`:focus-visible`).
 - גופן: Arial בלבד (Lexend שהסקיל הציע – לא תומך בעברית).
+- גרפים (סקיל `dataviz`): `src/components/charts/` – `StackedColumns` (לקוח, tooltip בריחוף/פוקוס), `ThinSegmentedBar`,
+  `MeterList` (זמינות מלאי + אייקון/תווית חומרה), `RankedBars`, `ChartCard` (כולל "הצג כטבלה").
+  פלטה: `SERIES` = כחול/כתום/טורקיז (3 חריצים ראשונים, עברו `validate_palette.js` על #ffffff); מעל 3 סדרות – לקפל ל"אחר".
+  טקסט לעולם לא בצבע הסדרה; סטטוס תמיד עם אייקון + תווית; ציר זמן מימין (ישן) לשמאל (חדש); שברים כ"X מתוך Y".
+- אייקונים: lucide-react בלבד (ללא אימוג'י). `ItemIcon` – אייקון לפי שם פריט/קטגוריה; `PageHeader icon`, `StatCard icon/tone`.
 
 ## מוסכמות קוד (שלב 2)
 - לוגיקת מלאי: `src/lib/inventory.ts`. מוני פריט סידורי מחושבים מחדש מהסידוריים (`recalcSerialCounters`).

@@ -1,3 +1,4 @@
+import { PenLine } from "lucide-react";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
@@ -25,7 +26,7 @@ export default async function SignPage({ params }: { params: Promise<{ id: strin
   if (r.status !== "ALLOCATED") {
     return (
       <>
-        <PageHeader title="חתימה על קבלת ציוד" />
+        <PageHeader icon={<PenLine className="size-5" />} title="חתימה על קבלת ציוד" />
         <p className="card text-sm">הבקשה אינה ממתינה לחתימה (ייתכן שכבר נחתמה או שההקצאה שוחררה).</p>
       </>
     );
@@ -37,7 +38,7 @@ export default async function SignPage({ params }: { params: Promise<{ id: strin
 
   return (
     <>
-      <PageHeader title="חתימה על קבלת ציוד" subtitle={`${user.fullName} · מספר עובד ${user.employeeNumber} · ${user.unit.name}`} />
+      <PageHeader icon={<PenLine className="size-5" />} title="חתימה על קבלת ציוד" subtitle={`${user.fullName} · מספר עובד ${user.employeeNumber} · ${user.unit.name}`} />
       <div className="mx-auto max-w-xl space-y-4">
         <section className="card">
           <h2 className="mb-2 font-bold">הציוד שהוקצה לך</h2>

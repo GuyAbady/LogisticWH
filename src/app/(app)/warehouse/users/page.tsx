@@ -1,3 +1,4 @@
+import { Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole } from "@/lib/dal";
@@ -22,7 +23,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader title="משתמשים ויחידות" subtitle="הוספת עובדים, מנהלי יחידות ויחידות ארגוניות" />
+      <PageHeader icon={<Users className="size-5" />} title="משתמשים ויחידות" subtitle="הוספת עובדים, מנהלי יחידות ויחידות ארגוניות" />
 
       <div className="mb-6 grid gap-6 lg:grid-cols-[1fr_20rem]">
         <section className="card">

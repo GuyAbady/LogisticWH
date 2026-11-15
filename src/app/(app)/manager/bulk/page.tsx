@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Info } from "lucide-react";
+import { Info, Layers } from "lucide-react";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { getAssignments } from "@/lib/reports";
@@ -40,7 +40,7 @@ export default async function BulkPage({ searchParams }: { searchParams: Promise
 
   return (
     <>
-      <PageHeader title="פעולות מרוכזות" subtitle={`${me.unit.name} · ${employees.length} עובדים`} />
+      <PageHeader icon={<Layers className="size-5" />} title="פעולות מרוכזות" subtitle={`${me.unit.name} · ${employees.length} עובדים`} />
 
       <nav className="mb-5 flex gap-2" aria-label="סוג פעולה">
         <Link href="/manager/bulk" className={tabCls("distribute")} aria-current={tab === "distribute" ? "page" : undefined}>החתמה מרוכזת (חלוקה)</Link>

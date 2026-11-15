@@ -1,3 +1,4 @@
+import { UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
@@ -29,6 +30,7 @@ export default async function UserFolder({ params }: { params: Promise<{ id: str
   return (
     <>
       <PageHeader
+        icon={<UserRound className="size-5" />}
         title={`תיק ציוד – ${user.fullName}`}
         subtitle={`${ROLE_LABELS[user.role]} · ${user.unit.name} · מספר עובד ${user.employeeNumber}${user.isActive ? "" : " · לא פעיל"}`}
         actions={<ExportButton report="user" id={user.id} />}

@@ -1,26 +1,51 @@
 import { Construction, Inbox } from "lucide-react";
 import type { SerialStatus } from "@/generated/prisma/enums";
 
-export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
+export function PageHeader({ title, subtitle, actions, icon }: { title: string; subtitle?: string; actions?: React.ReactNode; icon?: React.ReactNode }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-3 border-b border-slate-200 pb-4">
-      <div className="min-w-0">
+      <div className="flex min-w-0 items-center gap-3">
+        {icon && (
+          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-brand-600 text-white shadow-sm" aria-hidden>
+            {icon}
+          </span>
+        )}
+        <div className="min-w-0">
         <h1 className="text-xl font-bold text-balance text-slate-900 md:text-2xl">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-slate-600">{subtitle}</p>}
+        </div>
       </div>
       {actions}
     </div>
   );
 }
 
-export function StatCard({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
-  return (
-    <div className="card">
-      <p className="text-xs font-bold text-slate-600">{label}</p>
-      <p className="tabular mt-1.5 text-2xl font-bold text-slate-900 md:text-3xl">{value}</p>
+// גווני שבב לאייקון – רקע בהיר + אייקון בגוון כהה (ניגודיות ≥ 4.5:1 לאייקון)
+const TONES = {
+  slate: "bg-slate-100 text-slate-700",
+  blue: "bg-sky-50 text-sky-800",
+  green: "bg-emerald-50 text-emerald-800",
+  amber: "bg-amber-50 text-amber-800",
+  violet: "bg-violet-50 text-violet-800",
+  red: "bg-red-50 text-red-800",
+} as const;
+export type Tone = keyof typeof TONES;
+
+/** אריח נתון (Stat tile): תווית · ערך · רמז; ערך בספרות פרופורציונליות (dataviz) */
+export function StatCard({ label, value, hint, icon, tone = "slate", href }: {
+  label: string; value: React.ReactNode; hint?: string; icon?: React.ReactNode; tone?: Tone; href?: string;
+}) {
+  const inner = (
+    <>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs font-bold text-slate-600">{label}</p>
+        {icon && <span className={`grid size-8 shrink-0 place-items-center rounded-lg ${TONES[tone]}`} aria-hidden>{icon}</span>}
+      </div>
+      <p className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">{value}</p>
       {hint && <p className="mt-1 text-xs text-slate-600">{hint}</p>}
-    </div>
+    </>
   );
+  return href ? <a href={href} className="card block hover:border-slate-300">{inner}</a> : <div className="card">{inner}</div>;
 }
 
 export function EmptyState({ text }: { text: string }) {

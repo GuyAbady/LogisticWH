@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlarmClock } from "lucide-react";
+import { AlarmClock, Undo2 } from "lucide-react";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { getAssignments } from "@/lib/reports";
@@ -42,7 +42,7 @@ export default async function WarehouseReturnsPage({ searchParams }: { searchPar
 
   return (
     <>
-      <PageHeader title="החזרות וזימונים" subtitle="זימון עובדים להחזרה, קליטת ציוד למלאי והפקת טופס זיכוי חתום" />
+      <PageHeader icon={<Undo2 className="size-5" />} title="החזרות וזימונים" subtitle="זימון עובדים להחזרה, קליטת ציוד למלאי והפקת טופס זיכוי חתום" />
 
       <section className="card mb-8">
         <h2 className="mb-3 font-bold">קליטת החזרה</h2>

@@ -31,6 +31,14 @@ async function main() {
 
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
+  // פיזור תאריכי תנועות לדוגמה על פני השבועיים האחרונים – כדי שגרף הפעילות יהיה מייצג
+  const daysAgo = (d: number, h = 10) => new Date(Date.now() - d * 86400000 - h * 3600000 + 12 * 3600000);
+  let cursor = 12;
+  const nextDay = () => {
+    cursor = cursor <= 1 ? 12 : cursor - 1;
+    return daysAgo(cursor, 9 + (cursor % 7));
+  };
+
   // ── יחידות ──
   const [logistics, it, ops] = await Promise.all([
     db.unit.create({ data: { name: 'מרלו"ג מרכזי', code: "WH" } }),
@@ -95,7 +103,7 @@ async function main() {
       serialIds.push(s.id);
     }
     await db.transaction.create({
-      data: { type: "STOCK_IN", catalogItemId: item.id, quantity: it2.count, performedById: whManager.id, note: "קליטת מלאי ראשונית" },
+      data: { type: "STOCK_IN", catalogItemId: item.id, quantity: it2.count, performedById: whManager.id, note: "קליטת מלאי ראשונית", createdAt: daysAgo(13) },
     });
     catalog[it2.sku] = { id: item.id, serialIds };
   }
@@ -105,7 +113,7 @@ async function main() {
       data: { sku: q.sku, name: q.name, category: q.category, totalQuantity: q.qty, availableQty: q.qty },
     });
     await db.transaction.create({
-      data: { type: "STOCK_IN", catalogItemId: item.id, quantity: q.qty, performedById: whManager.id, note: "קליטת מלאי ראשונית" },
+      data: { type: "STOCK_IN", catalogItemId: item.id, quantity: q.qty, performedById: whManager.id, note: "קליטת מלאי ראשונית", createdAt: daysAgo(serialItems.length + quantityItems.indexOf(q) > 7 ? 6 : 13) },
     });
     catalog[q.sku] = { id: item.id, serialIds: [] };
   }
@@ -134,6 +142,7 @@ async function main() {
         toUserId: userId,
         performedById: whManager.id,
         signatureId: sig.id,
+        createdAt: nextDay(),
       },
     });
   }
@@ -155,7 +164,7 @@ async function main() {
     });
     await db.catalogItem.update({ where: { id: catalog[sku].id }, data: { availableQty: { decrement: qty } } });
     await db.transaction.create({
-      data: { type: "ISSUE", catalogItemId: catalog[sku].id, quantity: qty, toUserId: userId, performedById: whManager.id, signatureId: sig.id },
+      data: { type: "ISSUE", catalogItemId: catalog[sku].id, quantity: qty, toUserId: userId, performedById: whManager.id, signatureId: sig.id, createdAt: nextDay() },
     });
   }
 

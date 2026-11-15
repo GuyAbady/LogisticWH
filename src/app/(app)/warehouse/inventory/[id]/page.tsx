@@ -1,3 +1,4 @@
+import { Package } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/dal";
@@ -39,6 +40,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
   return (
     <>
       <PageHeader
+        icon={<Package className="size-5" />}
         title={item.name}
         subtitle={`מק"ט ${item.sku} · ${item.category} · ${item.requiresSerial ? "מנוהל מספר סידורי" : "פריט כמותי"}`}
         actions={<ExportButton report="item" id={item.id} label="ייצוא איתור" />}

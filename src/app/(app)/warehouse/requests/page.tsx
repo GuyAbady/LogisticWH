@@ -1,3 +1,4 @@
+import { ClipboardList } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireRole } from "@/lib/dal";
@@ -42,7 +43,7 @@ export default async function WarehouseRequestsPage() {
 
   return (
     <>
-      <PageHeader title="דרישות מאושרות" subtitle="הקצאת ציוד, קביעת מועד איסוף ומעקב אחר חתימות" />
+      <PageHeader icon={<ClipboardList className="size-5" />} title="דרישות מאושרות" subtitle="הקצאת ציוד, קביעת מועד איסוף ומעקב אחר חתימות" />
 
       <h2 className="mb-3 flex items-center gap-2 font-bold">ממתינות להקצאה <span className="badge bg-sky-100 text-sky-900">{pending.length}</span></h2>
       <section className="mb-8 space-y-3">

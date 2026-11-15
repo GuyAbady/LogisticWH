@@ -1,3 +1,4 @@
+import { Hash } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireRole } from "@/lib/dal";
@@ -21,6 +22,7 @@ export default async function SerialPage({ params }: { params: Promise<{ id: str
   return (
     <>
       <PageHeader
+        icon={<Hash className="size-5" />}
         title={`מספר סידורי ${serial.serialNumber}`}
         subtitle={`${serial.catalogItem.name} · מק"ט ${serial.catalogItem.sku}`}
         actions={<ExportButton report="serial" id={serial.id} />}

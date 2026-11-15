@@ -4,6 +4,8 @@ import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { getUserEquipment } from "@/lib/queries";
 import { PageHeader, StatCard } from "@/components/ui";
+import { ChartCard, RankedBars } from "@/components/charts";
+import { ClipboardList, Hash, UsersRound, BarChart3 } from "lucide-react";
 import EquipmentList from "@/components/EquipmentList";
 
 export const metadata: Metadata = { title: "מצבת היחידה" };
@@ -34,12 +36,21 @@ export default async function ManagerHome({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader title={`מצבת ציוד – ${user.unit.name}`} />
+      <PageHeader icon={<UsersRound className="size-5" />} title={`מצבת ציוד – ${user.unit.name}`} subtitle="הציוד החתום על עובדי היחידה" />
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
-        <StatCard label="עובדים ביחידה" value={employees.length} />
-        <StatCard label="פריטים סידוריים חתומים" value={totalSerial} />
-        <StatCard label="בקשות ממתינות לאישורך" value={pendingRequests} />
+        <StatCard label="עובדים ביחידה" value={employees.length} icon={<UsersRound className="size-4" />} tone="blue" />
+        <StatCard label="פריטים סידוריים חתומים" value={totalSerial} icon={<Hash className="size-4" />} tone="green" />
+        <StatCard label="בקשות ממתינות לאישורך" value={pendingRequests} icon={<ClipboardList className="size-4" />} tone={pendingRequests ? "amber" : "slate"} href="/manager/requests" />
       </div>
+
+      <ChartCard className="mb-6" icon={<BarChart3 className="size-4" />} title="ציוד לפי עובד" subtitle="סה״כ פריטים חתומים (סידוריים + יחידות כמותיות)">
+        <RankedBars
+          unit="פריטים"
+          rows={employees
+            .map((e) => ({ id: e.id, label: e.fullName, href: `/manager?employee=${e.id}`, value: e._count.serialItems + e.quantityHoldings.reduce((s, h) => s + h.quantity, 0) }))
+            .sort((a, b) => b.value - a.value)}
+        />
+      </ChartCard>
 
       <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
         <section className="card p-2">

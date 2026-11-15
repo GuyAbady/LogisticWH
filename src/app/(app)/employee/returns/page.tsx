@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlarmClock } from "lucide-react";
+import { AlarmClock, Undo2 } from "lucide-react";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { DOC_TITLES } from "@/lib/receipt";
@@ -29,7 +29,7 @@ export default async function MyReturnsPage() {
 
   return (
     <>
-      <PageHeader title="החזרות וזיכויים" subtitle='זימונים להחזרת ציוד וטופסי זיכוי שהופקו עבורך' />
+      <PageHeader icon={<Undo2 className="size-5" />} title="החזרות וזיכויים" subtitle='זימונים להחזרת ציוד וטופסי זיכוי שהופקו עבורך' />
 
       <h2 className="mb-3 font-bold">זימונים להחזרה</h2>
       <section className="mb-8 space-y-2">

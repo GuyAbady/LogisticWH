@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PenLine, Undo2 } from "lucide-react";
+import { PackageCheck, PenLine, Undo2 } from "lucide-react";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { getUserEquipment } from "@/lib/queries";
@@ -20,7 +20,7 @@ export default async function EmployeeHome() {
   const signTotal = toSign + toAck;
   return (
     <>
-      <PageHeader title="הציוד החתום עליי" subtitle={`${user.fullName} · מספר עובד ${user.employeeNumber}`} />
+      <PageHeader icon={<PackageCheck className="size-5" />} title="הציוד החתום עליי" subtitle={`${user.fullName} · מספר עובד ${user.employeeNumber}`} />
       {signTotal > 0 && (
         <Link href="/employee/sign" className="mb-3 flex items-center gap-3 rounded-xl border border-violet-200 bg-violet-50 p-4 text-violet-900 hover:bg-violet-100">
           <PenLine className="size-5 shrink-0" aria-hidden />

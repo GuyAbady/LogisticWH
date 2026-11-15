@@ -1,3 +1,4 @@
+import { KeyRound } from "lucide-react";
 import { requireRole } from "@/lib/dal";
 import { changeOwnPassword } from "@/app/actions/account";
 import { PageHeader } from "@/components/ui";
@@ -9,7 +10,7 @@ export default async function AccountPage() {
   const user = await requireRole();
   return (
     <>
-      <PageHeader title="שינוי סיסמה" subtitle={user.fullName} />
+      <PageHeader icon={<KeyRound className="size-5" />} title="שינוי סיסמה" subtitle={user.fullName} />
       <div className="card max-w-md">
         <ActionForm action={changeOwnPassword} submitLabel="עדכן סיסמה" resetOnSuccess>
           <div><label className="label" htmlFor="current">סיסמה נוכחית</label><input id="current" name="current" type="password" required autoComplete="current-password" className="input" /></div>
