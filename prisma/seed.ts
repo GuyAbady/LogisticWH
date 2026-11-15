@@ -26,6 +26,7 @@ async function main() {
   await db.inventorySerial.deleteMany();
   await db.equipmentRequest.deleteMany();
   await db.catalogItem.deleteMany();
+  await db.category.deleteMany();
   await db.user.deleteMany();
   await db.unit.deleteMany();
 
@@ -52,13 +53,15 @@ async function main() {
     fullName: string,
     email: string,
     phone: string,
-    role: "EMPLOYEE" | "UNIT_MANAGER" | "WAREHOUSE_MANAGER",
+    role: "EMPLOYEE" | "UNIT_MANAGER" | "WAREHOUSE_MANAGER" | "ADMIN",
     unitId: string,
   ) =>
     db.user.create({
       data: { employeeNumber, fullName, email, phone, role, unitId, passwordHash },
     });
 
+  const admin = await mkUser("9000", "מנהלת מערכת", "admin@demo.local", "050-0000009", "ADMIN", logistics.id);
+  void admin;
   const whManager = await mkUser("1001", "דנה לוי", "warehouse@demo.local", "050-0000001", "WAREHOUSE_MANAGER", logistics.id);
   const itManager = await mkUser("2001", "יוסי כהן", "it.manager@demo.local", "050-0000002", "UNIT_MANAGER", it.id);
   const opsManager = await mkUser("3001", "מיכל אברהם", "ops.manager@demo.local", "050-0000003", "UNIT_MANAGER", ops.id);
@@ -66,6 +69,11 @@ async function main() {
   const itEmp2 = await mkUser("2003", "נועה פרץ", "noa@demo.local", "050-0000005", "EMPLOYEE", it.id);
   const opsEmp1 = await mkUser("3002", "רון ביטון", "ron@demo.local", "050-0000006", "EMPLOYEE", ops.id);
   const opsEmp2 = await mkUser("3003", "שירה דהן", "shira@demo.local", "050-0000007", "EMPLOYEE", ops.id);
+
+  // ── קטגוריות ──
+  for (const [name, icon] of [["מחשוב", "laptop"], ["תקשורת", "radio"], ["ציוד מגן", "hardhat"], ["מתכלים", "battery"]] as const) {
+    await db.category.create({ data: { name, icon } });
+  }
 
   // ── קטלוג ──
   const serialItems = [

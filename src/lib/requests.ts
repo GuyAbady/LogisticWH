@@ -34,7 +34,7 @@ export async function createRequest(actor: Actor, input: { catalogItemId: string
   if (!item || !item.isActive) throw new RequestError("פריט לא קיים");
   if (!Number.isInteger(input.quantity) || input.quantity < 1 || input.quantity > 100) throw new RequestError("כמות חייבת להיות בין 1 ל-100");
   // בקשה של מנהל יחידה אינה דורשת אישור עצמי – עוברת ישר למרלו"ג
-  const byManager = actor.role === "UNIT_MANAGER";
+  const byManager = actor.role === "UNIT_MANAGER" || actor.role === "ADMIN";
   return db.equipmentRequest.create({
     data: {
       requesterId: actor.id,
@@ -58,7 +58,7 @@ export async function cancelRequest(actor: Actor, requestId: string) {
 export async function managerDecision(actor: Actor, requestId: string, approve: boolean, note?: string) {
   const r = await db.equipmentRequest.findUnique({ where: { id: requestId } });
   // מנהל יחידה מחליט רק על בקשות היחידה שלו
-  if (!r || r.unitId !== actor.unitId) throw new RequestError("בקשה לא נמצאה");
+  if (!r || (actor.role !== "ADMIN" && r.unitId !== actor.unitId)) throw new RequestError("בקשה לא נמצאה");
   if (!approve && !note?.trim()) throw new RequestError("יש לציין סיבת דחייה");
   await db.$transaction((tx) =>
     transition(tx, requestId, "PENDING_MANAGER", {

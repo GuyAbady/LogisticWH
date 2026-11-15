@@ -31,10 +31,28 @@ export const getCurrentUser = cache(async () => {
 
 export type CurrentUser = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>;
 
-/** דורש משתמש מחובר עם אחד מהתפקידים; אחרת מפנה. */
+/** דורש משתמש מחובר עם אחד מהתפקידים; אחרת מפנה. ADMIN עובר כל בדיקת תפקיד (על-תפקיד). */
 export async function requireRole(...roles: Role[]): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (roles.length && !roles.includes(user.role)) redirect(ROLE_HOME[user.role]);
+  if (roles.length && user.role !== "ADMIN" && !roles.includes(user.role)) redirect(ROLE_HOME[user.role]);
   return user;
+}
+
+/**
+ * היחידה שבה פועל מנהל: מנהל יחידה – תמיד היחידה שלו (לא סומכים על פרמטר מהלקוח);
+ * מנהל מערכת – יחידה שנבחרה (אם קיימת), אחרת היחידה שלו.
+ */
+export async function actingUnit(user: CurrentUser, requestedUnitId?: string | null) {
+  if (user.role === "ADMIN" && requestedUnitId && requestedUnitId !== user.unitId) {
+    const unit = await db.unit.findUnique({ where: { id: requestedUnitId }, select: { id: true, name: true } });
+    if (unit) return unit;
+  }
+  return { id: user.unitId, name: user.unit.name };
+}
+
+/** שחקן לפעולות מנהל יחידה, עם יחידה פעילה (למנהל מערכת – לפי בחירה) */
+export async function managerActor(user: CurrentUser, requestedUnitId?: string | null) {
+  const unit = await actingUnit(user, requestedUnitId);
+  return { ...user, unitId: unit.id };
 }

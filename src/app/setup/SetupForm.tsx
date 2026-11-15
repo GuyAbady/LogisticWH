@@ -41,7 +41,7 @@ export default function SetupForm() {
       </fieldset>
 
       <fieldset className="space-y-3 border-t border-slate-200 pt-4">
-        <legend className="mb-2 font-bold">מנהל המרלו&quot;ג הראשון</legend>
+        <legend className="mb-2 font-bold">מנהל המערכת הראשון</legend>
         <Field name="fullName" label="שם מלא" autoComplete="name" defaultValue={v.fullName} />
         <Field name="employeeNumber" label="מספר עובד" dir="ltr" defaultValue={v.employeeNumber} />
         <Field name="email" label='דוא"ל' type="email" autoComplete="email" defaultValue={v.email} />

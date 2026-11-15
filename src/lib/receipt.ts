@@ -68,7 +68,7 @@ export function validateSignatureImage(dataUrl: string) {
 // מבנה כללי לטופסי זיכוי, חלוקה/איסוף מרוכזים ואישור עובד. RECEIPT נשאר במבנה המקורי
 // כדי שקבלות קיימות ימשיכו לעבור אימות.
 
-export type DocType = "RETURN" | "BULK_TRANSFER" | "BULK_COLLECT" | "ACK";
+export type DocType = "RETURN" | "BULK_TRANSFER" | "BULK_COLLECT" | "ACK" | "ISSUE";
 
 export const DOC_TITLES: Record<DocType | "RECEIPT", string> = {
   RECEIPT: "קבלה דיגיטלית על קבלת ציוד",
@@ -76,6 +76,7 @@ export const DOC_TITLES: Record<DocType | "RECEIPT", string> = {
   BULK_TRANSFER: "החתמה מרוכזת – חלוקת ציוד ע\"י מנהל היחידה",
   BULK_COLLECT: "זיכוי מרוכז – איסוף ציוד ע\"י מנהל היחידה",
   ACK: "אישור עובד לקבלת ציוד שחולק ע\"י מנהל היחידה",
+  ISSUE: "קבלה על ניפוק ציוד מהמרלו\"ג",
 };
 
 export const DOC_TERMS: Record<DocType, string> = {
@@ -84,7 +85,13 @@ export const DOC_TERMS: Record<DocType, string> = {
     "מנהל היחידה מאשר כי חילק את הציוד המפורט לעובדים הרשומים. עד לאישור כל עובד, האחריות לציוד נשארת על מנהל היחידה.",
   BULK_COLLECT: "מנהל היחידה מאשר כי אסף מהעובדים את הציוד המפורט והוא באחריותו. העובדים זוכו מאחריותם לציוד זה.",
   ACK: "אני מאשר/ת כי קיבלתי לידי את הציוד המפורט לעיל ממנהל היחידה, וכי מעתה הוא באחריותי האישית.",
+  ISSUE: "אני מאשר/ת כי קיבלתי לידי מהמרלו\"ג את הציוד המפורט לעיל במצב תקין, וכי הוא באחריותי האישית עד להחזרתו.",
 };
+
+/** נוסח לניפוק למנהל יחידה לצורך חלוקה לעובדיו */
+export const ISSUE_TO_MANAGER_TERMS =
+  "אני, מנהל/ת היחידה, מאשר/ת כי קיבלתי מהמרלו\"ג את הציוד המפורט לעיל לצורך חלוקה לעובדי היחידה. " +
+  "הציוד באחריותי עד לחלוקתו ולאישור העובדים במערכת.";
 
 export type DocLine = {
   employeeId: string;

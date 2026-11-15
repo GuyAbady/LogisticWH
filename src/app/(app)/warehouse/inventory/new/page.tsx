@@ -1,4 +1,5 @@
 import { PackagePlus } from "lucide-react";
+import Link from "next/link";
 import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { createCatalogItem } from "@/app/actions/inventory";
@@ -9,7 +10,7 @@ export const metadata = { title: "פריט חדש" };
 
 export default async function NewItemPage() {
   await requireRole("WAREHOUSE_MANAGER");
-  const categories = await db.catalogItem.findMany({ distinct: ["category"], select: { category: true } });
+  const categories = await db.category.findMany({ orderBy: { name: "asc" }, select: { name: true } });
   return (
     <>
       <PageHeader icon={<PackagePlus className="size-5" />} title="פריט קטלוג חדש" subtitle="לאחר היצירה ניתן לקלוט מלאי בכרטיס הפריט" />
@@ -25,8 +26,11 @@ export default async function NewItemPage() {
           </div>
           <div>
             <label className="label" htmlFor="category">קטגוריה</label>
-            <input id="category" name="category" required className="input" list="categories" />
-            <datalist id="categories">{categories.map((c) => <option key={c.category} value={c.category} />)}</datalist>
+            <select id="category" name="category" required defaultValue="" className="input">
+              <option value="" disabled>בחר קטגוריה</option>
+              {categories.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+            </select>
+            <p className="mt-1 text-xs text-slate-600"><Link className="link" href="/warehouse/categories">ניהול קטגוריות</Link></p>
           </div>
           <div>
             <label className="label" htmlFor="description">תיאור (רשות)</label>

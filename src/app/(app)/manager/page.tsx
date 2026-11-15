@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { requireRole } from "@/lib/dal";
+import { actingUnit, requireRole } from "@/lib/dal";
+import UnitSwitcher from "@/components/UnitSwitcher";
 import { db } from "@/lib/db";
 import { getUserEquipment } from "@/lib/queries";
 import { PageHeader, StatCard } from "@/components/ui";
@@ -10,13 +11,15 @@ import EquipmentList from "@/components/EquipmentList";
 
 export const metadata: Metadata = { title: "מצבת היחידה" };
 
-export default async function ManagerHome({ searchParams }: { searchParams: Promise<{ employee?: string }> }) {
+export default async function ManagerHome({ searchParams }: { searchParams: Promise<{ employee?: string; unit?: string }> }) {
   const user = await requireRole("UNIT_MANAGER");
-  const { employee } = await searchParams;
+  const { employee, unit: unitParam } = await searchParams;
+  const unit = await actingUnit(user, unitParam);
+  const q = user.role === "ADMIN" ? `unit=${unit.id}&` : "";
 
   const [employees, pendingRequests] = await Promise.all([
     db.user.findMany({
-      where: { unitId: user.unitId, isActive: true },
+      where: { unitId: unit.id, isActive: true },
       select: {
         id: true,
         fullName: true,
@@ -26,7 +29,7 @@ export default async function ManagerHome({ searchParams }: { searchParams: Prom
       },
       orderBy: { fullName: "asc" },
     }),
-    db.equipmentRequest.count({ where: { unitId: user.unitId, status: "PENDING_MANAGER" } }),
+    db.equipmentRequest.count({ where: { unitId: unit.id, status: "PENDING_MANAGER" } }),
   ]);
 
   // אבטחה: מסננים רק עובדים מהיחידה של המנהל (לא סומכים על הפרמטר מה-URL)
@@ -36,7 +39,8 @@ export default async function ManagerHome({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <PageHeader icon={<UsersRound className="size-5" />} title={`מצבת ציוד – ${user.unit.name}`} subtitle="הציוד החתום על עובדי היחידה" />
+      <PageHeader icon={<UsersRound className="size-5" />} title={`מצבת ציוד – ${unit.name}`} subtitle="הציוד החתום על עובדי היחידה" />
+      {user.role === "ADMIN" && <UnitSwitcher current={unit.id} action="/manager" />}
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3">
         <StatCard label="עובדים ביחידה" value={employees.length} icon={<UsersRound className="size-4" />} tone="blue" />
         <StatCard label="פריטים סידוריים חתומים" value={totalSerial} icon={<Hash className="size-4" />} tone="green" />
@@ -47,7 +51,7 @@ export default async function ManagerHome({ searchParams }: { searchParams: Prom
         <RankedBars
           unit="פריטים"
           rows={employees
-            .map((e) => ({ id: e.id, label: e.fullName, href: `/manager?employee=${e.id}`, value: e._count.serialItems + e.quantityHoldings.reduce((s, h) => s + h.quantity, 0) }))
+            .map((e) => ({ id: e.id, label: e.fullName, href: `/manager?${q}employee=${e.id}`, value: e._count.serialItems + e.quantityHoldings.reduce((s, h) => s + h.quantity, 0) }))
             .sort((a, b) => b.value - a.value)}
         />
       </ChartCard>
@@ -62,7 +66,7 @@ export default async function ManagerHome({ searchParams }: { searchParams: Prom
               return (
                 <li key={e.id}>
                   <Link
-                    href={`/manager?employee=${e.id}`}
+                    href={`/manager?${q}employee=${e.id}`}
                     className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${active ? "bg-brand-50 font-bold text-brand-700" : "hover:bg-slate-50"}`}
                   >
                     <span>{e.fullName} <span className="text-xs text-slate-500">({e.employeeNumber})</span></span>

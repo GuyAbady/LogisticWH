@@ -17,6 +17,7 @@ const SUCCESS: Record<string, string> = {
   BULK_TRANSFER: "החלוקה נרשמה. כל עובד יקבל בקשה לאשר את הציוד; עד האישור הוא באחריותך.",
   BULK_COLLECT: "הציוד נאסף ונרשם עליך. העובדים זוכו וקיבלו טופס זיכוי.",
   ACK: "אישרת את קבלת הציוד. מעתה הוא רשום עליך.",
+  ISSUE: "הניפוק נרשם. הציוד רשום על המקבל, והקבלה נשלחה אליו (אם הוגדר מייל/SMS).",
 };
 
 export default async function DocumentPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ new?: string }> }) {
@@ -32,7 +33,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
   const employeeIds = isReceipt ? [(parsed as ReceiptDoc).employee.id] : [...new Set((parsed as GenericDoc).lines.map((l) => l.employeeId))];
 
   // הרשאה: החותם, עובד שמופיע במסמך, מנהל המרלו"ג, או מנהל יחידה של החותם/של עובד במסמך
-  let allowed = sig.signerId === user.id || employeeIds.includes(user.id) || user.role === "WAREHOUSE_MANAGER";
+  let allowed = sig.signerId === user.id || employeeIds.includes(user.id) || user.role === "WAREHOUSE_MANAGER" || user.role === "ADMIN";
   if (!allowed && user.role === "UNIT_MANAGER") {
     allowed = sig.signer.unitId === user.unitId || (await db.user.count({ where: { id: { in: employeeIds }, unitId: user.unitId } })) > 0;
   }
@@ -117,7 +118,7 @@ export default async function DocumentPage({ params, searchParams }: { params: P
       </article>
 
       <p className="mt-4 text-center text-sm print:hidden">
-        <Link className="link" href={user.role === "WAREHOUSE_MANAGER" ? "/warehouse" : user.role === "UNIT_MANAGER" ? "/manager" : "/employee"}>חזרה</Link>
+        <Link className="link" href={user.role === "ADMIN" ? "/admin" : user.role === "WAREHOUSE_MANAGER" ? "/warehouse" : user.role === "UNIT_MANAGER" ? "/manager" : "/employee"}>חזרה</Link>
       </p>
     </>
   );

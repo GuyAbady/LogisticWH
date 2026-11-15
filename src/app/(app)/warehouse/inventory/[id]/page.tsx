@@ -5,7 +5,7 @@ import { requireRole } from "@/lib/dal";
 import { db } from "@/lib/db";
 import { getHistory, getItemLocation } from "@/lib/reports";
 import { allowedSerialTransitions } from "@/lib/inventory";
-import { adjustStock, receiveStock, setSerialStatus } from "@/app/actions/inventory";
+import { adjustStock, receiveStock, setSerialStatus, updateCatalogItem } from "@/app/actions/inventory";
 import { PageHeader, StatCard, SerialBadge, EmptyState } from "@/components/ui";
 import { AssignmentTable, ExportButton, HistoryList } from "@/components/data";
 import ActionForm from "@/components/ActionForm";
@@ -25,7 +25,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
   if (!loc) notFound();
   const { item } = loc;
 
-  const [serials, history] = await Promise.all([
+  const [serials, history, categories] = await Promise.all([
     item.requiresSerial
       ? db.inventorySerial.findMany({
           where: { catalogItemId: id, ...(status ? { status } : { status: { not: "WRITTEN_OFF" } }) },
@@ -35,6 +35,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
         })
       : Promise.resolve([]),
     getHistory({ catalogItemId: id }, 50),
+    db.category.findMany({ orderBy: { name: "asc" }, select: { name: true } }),
   ]);
 
   return (
@@ -45,6 +46,25 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
         subtitle={`מק"ט ${item.sku} · ${item.category} · ${item.requiresSerial ? "מנוהל מספר סידורי" : "פריט כמותי"}`}
         actions={<ExportButton report="item" id={item.id} label="ייצוא איתור" />}
       />
+
+      <details className="card mb-6">
+        <summary className="cursor-pointer font-bold">עריכת פרטי הפריט</summary>
+        <ActionForm action={updateCatalogItem} submitLabel="שמירת שינויים" className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input type="hidden" name="id" value={item.id} />
+          <div><label className="label" htmlFor="edit-name">שם הפריט</label><input id="edit-name" name="name" defaultValue={item.name} required className="input" /></div>
+          <div>
+            <label className="label" htmlFor="edit-category">קטגוריה</label>
+            <select id="edit-category" name="category" defaultValue={item.category} className="input">
+              {categories.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+            </select>
+          </div>
+          <div className="sm:col-span-2"><label className="label" htmlFor="edit-desc">תיאור</label><textarea id="edit-desc" name="description" defaultValue={item.description ?? ""} rows={2} className="input" /></div>
+          <label className="flex min-h-11 items-center gap-2 text-sm font-bold">
+            <input type="checkbox" name="isActive" defaultChecked={item.isActive} className="size-5" /> פריט פעיל (מוצג בבקשות ובניפוק)
+          </label>
+          <p className="text-xs text-slate-600 sm:col-span-2">מק&quot;ט וסוג הפריט (סידורי/כמותי) אינם ניתנים לשינוי – הם משפיעים על נתונים קיימים.</p>
+        </ActionForm>
+      </details>
 
       {/* היכן הפריט נמצא */}
       <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">

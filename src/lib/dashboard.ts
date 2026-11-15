@@ -23,3 +23,8 @@ export async function dailyActivity(days = 14) {
   }
   return out;
 }
+
+/** נקודת זמן לפני N שעות (מחוץ לרינדור – כלל הטוהר של React) */
+export function hoursAgo(h: number) {
+  return new Date(Date.now() - h * 3600 * 1000);
+}

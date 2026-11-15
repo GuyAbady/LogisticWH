@@ -83,7 +83,7 @@ export async function runSetup(_prev: SetupState, formData: FormData): Promise<S
           employeeNumber: d.employeeNumber,
           email: d.email,
           phone: d.phone,
-          role: "WAREHOUSE_MANAGER",
+          role: "ADMIN",
           unitId: unit.id,
           passwordHash,
         },
@@ -100,6 +100,6 @@ export async function runSetup(_prev: SetupState, formData: FormData): Promise<S
   }
 
   await audit({ userId: created.userId, action: "SETUP_COMPLETED", entity: "User", entityId: created.userId });
-  await createSession({ userId: created.userId, role: "WAREHOUSE_MANAGER", unitId: created.unitId });
-  redirect("/warehouse");
+  await createSession({ userId: created.userId, role: "ADMIN", unitId: created.unitId });
+  redirect("/admin");
 }
