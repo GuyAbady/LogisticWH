@@ -56,6 +56,7 @@ enum SummonsStatus {
 enum TransactionType {
   STOCK_IN // קליטת מלאי
   ALLOCATE // הקצאה לבקשה
+  DEALLOCATE // שחרור הקצאה (ביטול/שינוי)
   ISSUE // מסירה + חתימה לעובד
   RETURN // החזרה + זיכוי
   TRANSFER // העברה בין עובדים

@@ -56,7 +56,7 @@ export function BottomNav({ items: all }: { items: NavItem[] }) {
   const pathname = usePathname();
   const items = all.filter((i) => !i.desktopOnly); // עד 5 פריטים בסרגל התחתון (ui-ux-pro-max: Bottom nav ≤5)
   return (
-    <nav aria-label="ניווט ראשי" className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav aria-label="ניווט ראשי" className="fixed inset-x-0 bottom-0 z-20 print:hidden border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
       <ul className="grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
         {items.map((item) => {
           const Icon = ICONS[item.icon] ?? Package;

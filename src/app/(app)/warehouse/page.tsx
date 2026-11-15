@@ -9,7 +9,7 @@ import { PageHeader, StatCard, EmptyState, fmtDate } from "@/components/ui";
 export const metadata: Metadata = { title: 'לוח בקרה – מרלו"ג' };
 
 const TX_LABELS: Record<string, string> = {
-  STOCK_IN: "קליטת מלאי", ALLOCATE: "הקצאה", ISSUE: "מסירה וחתימה", RETURN: "החזרה וזיכוי",
+  STOCK_IN: "קליטת מלאי", ALLOCATE: "הקצאה", DEALLOCATE: "שחרור הקצאה", ISSUE: "מסירה וחתימה", RETURN: "החזרה וזיכוי",
   TRANSFER: "העברה", ADJUST: "תיקון מלאי", REPAIR_OUT: "יציאה לתיקון", REPAIR_IN: "חזרה מתיקון", WRITE_OFF: "גריעה",
 };
 
