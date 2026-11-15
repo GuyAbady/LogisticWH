@@ -23,6 +23,24 @@
 - חתימה מרוכזת של מנהל יחידה: `requiresAck=true`; האחריות עוברת לעובד רק לאחר `ackAt`.
 - מנהל יחידה רואה/פועל רק על עובדי היחידה שלו – לסנן תמיד לפי `user.unitId` מהשרת.
 
+## מערכת עיצוב
+- סקילים בפרויקט (`.claude/skills/`, מקורות ב-`SOURCES.md`): `ui-ux-pro-max`, `emil-design-eng`,
+  `review-animations`, `animation-performance`, `animate`. להשתמש בהם בכל שינוי ממשק.
+- סגנון: Flat/Minimal לכלי ארגוני. Primary = slate (`brand-*`), Accent = ירוק מלאי (`accent-*`, 600=#047857).
+  ניגודיות טקסט ≥ 4.5:1 (AA). לא להשתמש ב-#059669 עם טקסט לבן (3.77:1).
+- רכיבים: `card`, `btn-primary|accent|secondary|danger`, `input`, `label`, `badge`, `link`, `table-base`, `feedback-enter` (globals.css).
+- תנועה: כפתור `scale(0.97)` ב-160ms `--ease-out`; אין אנימציה לניווט/פעולות תכופות; רק transform/opacity;
+  הודעות משוב 200ms; לכבד `prefers-reduced-motion`. hover ב-Tailwind v4 פעיל רק במכשירים עם hover.
+- יעד מגע ≥ 44px (`min-h-11`), כפתורים קטנים בטבלאות `min-h-9`; פוקוס גלוי (`:focus-visible`).
+- גופן: Arial בלבד (Lexend שהסקיל הציע – לא תומך בעברית).
+
+## מוסכמות קוד (שלב 2)
+- לוגיקת מלאי: `src/lib/inventory.ts`. מוני פריט סידורי מחושבים מחדש מהסידוריים (`recalcSerialCounters`).
+- שאילתות איתור/דוחות: `src/lib/reports.ts` – משמשות גם את המסכים וגם את הייצוא (מקור אחד).
+- ייצוא Excel: `src/lib/excel.ts` + `src/app/api/export/[report]`. נתיבי `/api` לא עוברים ב-proxy – לבדוק הרשאה בקוד.
+- טפסים: `src/components/ActionForm.tsx` – שליחה דרך startTransition כדי ש-React 19 לא ימחק שדות בשגיאת אימות.
+- `uuid` מקובע ל-11.1.1 דרך `overrides` (GHSA-w5hq-g745-h8pq, תלות של exceljs).
+
 ## הקמה ראשונית
 - `/setup` – יצירת מנהל מרלו"ג ראשון. פעיל רק אם `SETUP_TOKEN` (16+ תווים) מוגדר **ו**אין משתמשים.
 - לוגיקה: `src/lib/setup.ts` (server-only) + `src/app/actions/setup.ts`.
@@ -34,6 +52,6 @@
 
 ## שלבי פיתוח
 1. ✅ תשתית, סכמה, נתוני דוגמה, אימות והרשאות, מבנה ממשק לכל תפקיד
-2. איתור מהיר (עובד/יחידה/ציוד), ניהול מלאי, ייצוא Excel
+2. ✅ איתור מהיר (עובד/יחידה/ציוד/סידורי), ניהול מלאי, ייצוא Excel, ניהול משתמשים ויחידות, שינוי סיסמה
 3. זרימת בקשות, הקצאה, חתימה דיגיטלית, קבלות (מייל + Webhook SMS)
 4. זימוני החזרה, פעולות מרוכזות למנהל יחידה, תשתית סריקת ברקוד

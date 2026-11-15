@@ -10,14 +10,14 @@ export default function LoginForm() {
     <form action={action} className="space-y-4">
       <div>
         <label htmlFor="email" className="label">דוא&quot;ל</label>
-        <input id="email" name="email" type="email" autoComplete="username" required className="input" />
+        <input id="email" name="email" type="email" autoComplete="username" required className="input" key={state?.email} defaultValue={state?.email} />
       </div>
       <div>
         <label htmlFor="password" className="label">סיסמה</label>
         <input id="password" name="password" type="password" autoComplete="current-password" required className="input" />
       </div>
       {state?.error && (
-        <p role="alert" className="flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+        <p role="alert" className="feedback-enter flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           <AlertCircle className="size-4 shrink-0" /> {state.error}
         </p>
       )}

@@ -1,11 +1,11 @@
-import { Construction } from "lucide-react";
+import { Construction, Inbox } from "lucide-react";
 import type { SerialStatus } from "@/generated/prisma/enums";
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 className="text-2xl font-bold">{title}</h1>
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-x-4 gap-y-3 border-b border-slate-200 pb-4">
+      <div className="min-w-0">
+        <h1 className="text-xl font-bold text-balance text-slate-900 md:text-2xl">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-slate-600">{subtitle}</p>}
       </div>
       {actions}
@@ -13,18 +13,23 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   );
 }
 
-export function StatCard({ label, value, hint }: { label: string; value: number | string; hint?: string }) {
+export function StatCard({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
   return (
     <div className="card">
-      <p className="text-sm text-slate-600">{label}</p>
-      <p className="mt-1 text-3xl font-bold">{value}</p>
-      {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
+      <p className="text-xs font-bold text-slate-600">{label}</p>
+      <p className="tabular mt-1.5 text-2xl font-bold text-slate-900 md:text-3xl">{value}</p>
+      {hint && <p className="mt-1 text-xs text-slate-600">{hint}</p>}
     </div>
   );
 }
 
 export function EmptyState({ text }: { text: string }) {
-  return <p className="rounded-lg border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">{text}</p>;
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-white/60 p-8 text-center text-sm text-slate-600">
+      <Inbox className="size-6 text-slate-400" aria-hidden />
+      {text}
+    </div>
+  );
 }
 
 export function ComingSoon({ stage, title, bullets }: { stage: number; title: string; bullets: string[] }) {
@@ -61,3 +66,6 @@ export function SerialBadge({ status }: { status: SerialStatus }) {
 
 export const fmtDate = (d: Date) =>
   new Intl.DateTimeFormat("he-IL", { dateStyle: "short", timeZone: "Asia/Jerusalem" }).format(d);
+
+export const fmtDateTime = (d: Date) =>
+  new Intl.DateTimeFormat("he-IL", { dateStyle: "short", timeStyle: "short", timeZone: "Asia/Jerusalem" }).format(d);

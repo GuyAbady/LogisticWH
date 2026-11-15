@@ -13,7 +13,7 @@ const LoginSchema = z.object({
   password: z.string().min(1, "יש להזין סיסמה"),
 });
 
-export type LoginState = { error?: string } | undefined;
+export type LoginState = { error?: string; email?: string } | undefined;
 
 const MAX_FAILURES = 5;
 const LOCK_WINDOW_MIN = 15;
@@ -26,7 +26,8 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     email: formData.get("email"),
     password: formData.get("password"),
   });
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const typedEmail = String(formData.get("email") ?? "").slice(0, 200);
+  if (!parsed.success) return { error: parsed.error.issues[0].message, email: typedEmail };
   const { email, password } = parsed.data;
 
   // נעילה זמנית אחרי ניסיונות כושלים חוזרים
@@ -35,7 +36,7 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
     where: { action: "LOGIN_FAILED", entityId: email, createdAt: { gte: since } },
   });
   if (failures >= MAX_FAILURES) {
-    return { error: `יותר מדי ניסיונות כושלים. נסה שוב בעוד ${LOCK_WINDOW_MIN} דקות.` };
+    return { error: `יותר מדי ניסיונות כושלים. נסה שוב בעוד ${LOCK_WINDOW_MIN} דקות.`, email: typedEmail };
   }
 
   const user = await db.user.findUnique({ where: { email } });
@@ -43,7 +44,7 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
 
   if (!user || !ok || !user.isActive) {
     await audit({ userId: user?.id, action: "LOGIN_FAILED", entity: "User", entityId: email });
-    return { error: "דוא\"ל או סיסמה שגויים" };
+    return { error: "דוא\"ל או סיסמה שגויים", email: typedEmail };
   }
 
   await createSession({ userId: user.id, role: user.role, unitId: user.unitId });

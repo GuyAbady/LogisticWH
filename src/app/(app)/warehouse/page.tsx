@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Plus, Search, Users } from "lucide-react";
 import { requireRole } from "@/lib/dal";
+import { ExportButton } from "@/components/data";
 import { db } from "@/lib/db";
 import { PageHeader, StatCard, EmptyState, fmtDate } from "@/components/ui";
 
@@ -35,7 +38,17 @@ export default async function WarehouseHome() {
 
   return (
     <>
-      <PageHeader title='לוח בקרה – מרלו"ג' />
+      <PageHeader
+        title='לוח בקרה – מרלו"ג'
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/warehouse/lookup" className="btn-secondary"><Search className="size-4" /> איתור</Link>
+            <Link href="/warehouse/inventory/new" className="btn-secondary"><Plus className="size-4" /> פריט חדש</Link>
+            <Link href="/warehouse/users" className="btn-secondary"><Users className="size-4" /> משתמשים</Link>
+            <ExportButton report="inventory" label="דוח מלאי" />
+          </div>
+        }
+      />
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="פריטי קטלוג" value={items.length} />
         <StatCard label="יחידות במחסן" value={inStock} hint={`מתוך ${totalUnits} בארגון`} />
@@ -47,7 +60,7 @@ export default async function WarehouseHome() {
         <section className="card">
           <h2 className="mb-3 font-bold">מצב מלאי לפי פריט</h2>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="table-base">
               <thead className="text-right text-slate-500">
                 <tr><th className="py-2">פריט</th><th>סוג</th><th>במחסן</th><th>משויך</th></tr>
               </thead>
@@ -55,7 +68,7 @@ export default async function WarehouseHome() {
                 {items.map((i) => (
                   <tr key={i.id} className="border-t border-slate-100">
                     <td className="py-2">
-                      <p className="font-bold">{i.name}</p>
+                      <Link href={`/warehouse/inventory/${i.id}`} className="link">{i.name}</Link>
                       <p className="ltr text-right font-mono text-xs text-slate-500">{i.sku}</p>
                     </td>
                     <td>{i.requiresSerial ? "סידורי" : "כמותי"}</td>

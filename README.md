@@ -37,28 +37,8 @@ npm run dev                 # http://localhost:3000
 6. **לא** להריץ `db:seed` בייצור (הסקריפט חוסם זאת).
 
 ### כתובת ייצור והגנת גישה
-- הכתובת `logisticwh.vercel.app` **אינה** שייכת לפרויקט (תפוסה). יש להגדיר כתובת ייצור ב-Settings → Domains
-  (למשל `<שם-פנוי>.vercel.app`) ולשייך אותה ל-Production.
-- Settings → Deployment Protection: **Standard Protection** – כתובת הייצור ציבורית (העובדים נכנסים דרך מסך הכניסה של המערכת),
-  כתובות Preview נעולות בהתחברות Vercel.
+- כתובת הייצור: **https://logisticwh.vercel.app** (ציבורית; העובדים נכנסים דרך מסך הכניסה של המערכת).
+- Settings → Deployment Protection: **Standard Protection** – כתובות Preview נעולות בהתחברות Vercel.
 - Production Branch: `main`. פיתוח נעשה ב-branch נפרד ומוזג ל-`main` רק לאחר בדיקה ב-Preview.
-
-> הערה: "Vercel Postgres" הופסק והועבר ל-Neon בדצמבר 2024; כיום מסד הנתונים מוקם דרך Vercel Marketplace.
-> מקורות: [Vercel Docs – Postgres](https://vercel.com/docs/postgres), [Prisma – Deploy to Vercel](https://www.prisma.io/docs/orm/prisma-client/deployment/edge/deploy-to-vercel).
-
-## מבנה
-```
-prisma/schema.prisma      סכמת DB (כולל יומן תנועות וחתימות)
-prisma/seed.ts            נתוני דוגמה
-src/proxy.ts              הפניות לפי תפקיד (בדיקה אופטימית)
-src/lib/dal.ts            בדיקת הרשאות מחייבת מול DB
-src/lib/session*.ts       Session מוצפן (JWT, httpOnly)
-src/app/(app)/employee    ממשק עובד
-src/app/(app)/manager     ממשק מנהל יחידה
-src/app/(app)/warehouse   ממשק מנהל מרלו"ג
-```
-
-## אבטחה ופרטיות
-- סיסמאות: bcrypt (12 סבבים). נעילה זמנית אחרי 5 כישלונות ב-15 דקות.
-- יומן פעולות (`AuditLog`) לכניסות ולפעולות רגישות – בהתאם לתקנות הגנת הפרטיות (אבטחת מידע), התשע"ז-2017.
-- כל דף ופעולה בודקים הרשאה בצד השרת; מנהל יחידה מוגבל ליחידתו.
+- **Framework Preset חייב להיות Next.js.** אם הוא "Other", הבנייה מצליחה אך כל הכתובות מחזירות 404 (`NOT_FOUND`).
+  הקובץ `vercel.json` מקבע `"framework": "nextjs"` כדי למנוע זאת.
