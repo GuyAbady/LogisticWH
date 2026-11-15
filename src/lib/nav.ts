@@ -1,7 +1,7 @@
 import type { Role } from "@/generated/prisma/enums";
 
 // iconName ממופה לאייקון ב-NavLinks (רכיב לקוח) – כדי שקובץ זה יישאר נתונים בלבד
-export type NavItem = { href: string; label: string; icon: string; stage?: number };
+export type NavItem = { href: string; label: string; icon: string; stage?: number; desktopOnly?: boolean };
 
 export const NAV: Record<Role, NavItem[]> = {
   EMPLOYEE: [
@@ -18,9 +18,10 @@ export const NAV: Record<Role, NavItem[]> = {
   ],
   WAREHOUSE_MANAGER: [
     { href: "/warehouse", label: "לוח בקרה", icon: "dashboard" },
-    { href: "/warehouse/lookup", label: "איתור מהיר", icon: "search", stage: 2 },
-    { href: "/warehouse/inventory", label: "מלאי", icon: "boxes", stage: 2 },
+    { href: "/warehouse/lookup", label: "איתור מהיר", icon: "search" },
+    { href: "/warehouse/inventory", label: "מלאי", icon: "boxes" },
     { href: "/warehouse/requests", label: "דרישות", icon: "clipboard", stage: 3 },
     { href: "/warehouse/returns", label: "החזרות", icon: "undo", stage: 4 },
+    { href: "/warehouse/users", label: "משתמשים", icon: "users", desktopOnly: true },
   ],
 };

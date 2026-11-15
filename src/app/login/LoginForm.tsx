@@ -10,7 +10,7 @@ export default function LoginForm() {
     <form action={action} className="space-y-4">
       <div>
         <label htmlFor="email" className="label">דוא&quot;ל</label>
-        <input id="email" name="email" type="email" autoComplete="username" required className="input" />
+        <input id="email" name="email" type="email" autoComplete="username" required className="input" key={state?.email} defaultValue={state?.email} />
       </div>
       <div>
         <label htmlFor="password" className="label">סיסמה</label>

@@ -13,7 +13,7 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   );
 }
 
-export function StatCard({ label, value, hint }: { label: string; value: number | string; hint?: string }) {
+export function StatCard({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
   return (
     <div className="card">
       <p className="text-sm text-slate-600">{label}</p>
@@ -61,3 +61,6 @@ export function SerialBadge({ status }: { status: SerialStatus }) {
 
 export const fmtDate = (d: Date) =>
   new Intl.DateTimeFormat("he-IL", { dateStyle: "short", timeZone: "Asia/Jerusalem" }).format(d);
+
+export const fmtDateTime = (d: Date) =>
+  new Intl.DateTimeFormat("he-IL", { dateStyle: "short", timeStyle: "short", timeZone: "Asia/Jerusalem" }).format(d);
