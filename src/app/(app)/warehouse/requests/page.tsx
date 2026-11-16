@@ -8,6 +8,7 @@ import { allocate, rejectByWarehouse, release } from "@/app/actions/requests";
 import { PageHeader, EmptyState } from "@/components/ui";
 import { RequestCard } from "@/components/RequestCard";
 import ActionForm from "@/components/ActionForm";
+import PickupSlotPicker from "@/components/PickupSlotPicker";
 
 export const metadata: Metadata = { title: "דרישות" };
 
@@ -38,8 +39,10 @@ export default async function WarehouseRequestsPage() {
     select: { id: true, serialNumber: true, catalogItemId: true },
   });
 
-  // ברירת מחדל למועד איסוף: מחר 09:00 שעון ישראל
+  // ברירת מחדל למועד ידני: מחר 09:00 שעון ישראל; משבצות תפוסות = הקצאות פתוחות
   const tomorrow = defaultPickupLocal();
+  const nowIso = new Date().toISOString();
+  const taken = allocated.flatMap((r) => (r.pickupDate ? [r.pickupDate.toISOString()] : []));
 
   return (
     <>
@@ -75,15 +78,10 @@ export default async function WarehouseRequestsPage() {
                     </div>
                   </fieldset>
                 )}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="label" htmlFor={`pickup-${r.id}`}>מועד איסוף</label>
-                    <input id={`pickup-${r.id}`} name="pickupDate" type="datetime-local" required defaultValue={tomorrow} className="input" />
-                  </div>
-                  <div>
-                    <label className="label" htmlFor={`note-${r.id}`}>הערה לעובד (רשות)</label>
-                    <input id={`note-${r.id}`} name="note" maxLength={300} className="input" placeholder="למשל: עמדה 3" />
-                  </div>
+                <PickupSlotPicker id={`pickup-${r.id}`} taken={taken} now={nowIso} fallbackLocal={tomorrow} />
+                <div>
+                  <label className="label" htmlFor={`note-${r.id}`}>הערה לעובד (רשות)</label>
+                  <input id={`note-${r.id}`} name="note" maxLength={300} className="input" placeholder="למשל: עמדה 3" />
                 </div>
               </ActionForm>
               <details className="mt-2">

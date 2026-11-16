@@ -1,5 +1,6 @@
 import "server-only";
 import { db } from "./db";
+import { PICKUP_SCHEDULE } from "./pickup-slots";
 import { recalcSerialCounters } from "./inventory";
 import { canonicalJson, RECEIPT_TERMS, sha256, type ReceiptDoc } from "./receipt";
 import type { Role } from "@/generated/prisma/enums";
@@ -81,6 +82,9 @@ export async function allocateRequest(actor: Actor, input: { requestId: string; 
   return db.$transaction(async (tx) => {
     const r = await tx.equipmentRequest.findUnique({ where: { id: input.requestId }, include: { catalogItem: true } });
     if (!r) throw new RequestError("בקשה לא נמצאה");
+    // קיבולת משבצת: מונע שני איסופים באותו מועד (למשל שני מחסנאים שבחרו במקביל)
+    const sameSlot = await tx.equipmentRequest.count({ where: { status: "ALLOCATED", pickupDate: input.pickupDate, id: { not: r.id } } });
+    if (sameSlot >= PICKUP_SCHEDULE.capacity) throw new RequestError("המועד נתפס בינתיים – בחרו מועד אחר");
     await transition(tx, r.id, "PENDING_WAREHOUSE", {
       status: "ALLOCATED",
       pickupDate: input.pickupDate,

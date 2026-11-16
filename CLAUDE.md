@@ -77,6 +77,16 @@
 - ניפוק ישיר: `src/lib/issue.ts` – מסמך `ISSUE` שנחתם ע"י המקבל; למנהל יחידה – נוסח "לחלוקה" (`ISSUE_TO_MANAGER_TERMS`).
 - מעטפת: `src/components/Shell.tsx` – סרגל מתכווץ (עוגייה `lwh_sidebar`), מגירת נייד, סרגל תחתון (`mobile` ב-nav.ts, עד 4 + "עוד").
 
+## מוסכמות קוד (בחירת מועד איסוף)
+- `src/components/ui/` – רכיבים בסגנון shadcn (קבצים בשמות kebab-case); `cn` ב-`src/lib/utils.ts` (ללא תלויות).
+  `src/components/ui.tsx` (PageHeader וכו') נשאר; `@/components/ui` מצביע אליו, `@/components/ui/<name>` לתיקייה.
+- `SlotWeekPicker` (`ui/slot-week-picker.tsx`, framer-motion 14.9.0 מקובע): מותאם ל-RTL/עברית/שעון ישראל ולמערכת העיצוב –
+  ללא גרדיאנט, תלת-ממד, blur מונפש או חלקיקים; סמן בחירה ב-`layoutId` (transform בלבד); `MotionConfig reducedMotion="user"`.
+  `name` מייצר שדה מוסתר בפורמט datetime-local לטופס Server Action.
+- משבצות איסוף: `src/lib/pickup-slots.ts` (`PICKUP_SCHEDULE`: א'–ה' 08:00–16:00, 30 דק', 4 שבועות, קיבולת 1 – הנחת עבודה).
+  `PickupSlotPicker` בונה את המשבצות בדפדפן; השרת מעביר רק מועדים תפוסים. "מועד אחר" = datetime-local חופשי.
+  `allocateRequest` חוסם מועד שהגיע לקיבולת ("המועד נתפס בינתיים").
+
 ## הקמה ראשונית
 - `/setup` – יצירת מנהל מערכת (ADMIN) ראשון. פעיל רק אם `SETUP_TOKEN` (16+ תווים) מוגדר **ו**אין משתמשים.
 - לוגיקה: `src/lib/setup.ts` (server-only) + `src/app/actions/setup.ts`.
